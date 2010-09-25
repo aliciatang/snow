@@ -1,0 +1,24 @@
+generator:
+  class: sfDoctrineGenerator
+  param:
+    model_class:           Account
+    theme:                 admin
+    non_verbose_templates: true
+    with_show:             false
+    singular:              ~
+    plural:                ~
+    route_prefix:          account
+    with_doctrine_route:   true
+    actions_base_class:    sfActions
+
+    config:
+      actions: ~
+      fields:  ~
+      list:    
+        display: [number,currency,open_date,type,agency,user_id]
+        title: Account Managment
+      filter:  
+        display: [number,currency,open_date,type,agency,user_id]
+      form:    ~
+      edit:    ~
+      new:     ~

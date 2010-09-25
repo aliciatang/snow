@@ -1,0 +1,11 @@
+# You can find more information about this file on the symfony website:
+# http://www.symfony-project.org/reference/1_4/en/12-Filters
+remember_me:
+  class: sfGuardRememberMeFilter
+rendering: ~
+security:  ~
+
+# insert your own filters here
+
+cache:     ~
+execution: ~
