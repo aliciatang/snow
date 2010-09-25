@@ -6,3 +6,4 @@ base/
 lib/vendor/
 log/
 plugins/
+!data/fixture/security.yml
