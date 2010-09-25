@@ -19,8 +19,7 @@ class securityActions extends sfActions
 
   public function executeShow(sfWebRequest $request)
   {
-    $this->security = Doctrine::getTable('Security')->find(array($request->getParameter('id')));
-    $this->forward404Unless($this->security);
+    $this->forward404Unless($this->sec = Doctrine::getTable('Security')->find(array($request->getParameter('id'))), sprintf('Object security does not exist (%s).', $request->getParameter('id')));
   }
 
   public function executeNew(sfWebRequest $request)

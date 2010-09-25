@@ -1,3 +1,12 @@
+transaction:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                transaction
+    module:               transaction
+    prefix_path:          /transaction
+    column:               id
+    with_wildcard_routes: true
+
 price:
   class: sfDoctrineRouteCollection
   options:
