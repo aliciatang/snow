@@ -1,0 +1,5 @@
+Required symfony plugins
+1.sfCsvPlugin
+2.sfDoctrineApplyPlugin
+3.sfDoctrineGuardLoginHistoryPlugin
+4.sfDoctrineGuardPlugin
