@@ -1,0 +1,315 @@
+Account:
+  connection: doctrine
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
+  tableName: account
+  actAs: [Timestampable]
+  columns:
+    number:
+      type: string(64)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    currency:
+      type: enum
+      values: ['USD','RMB','HKD']
+      fixed: false
+      unsigned: false
+      primary: false
+      default: USD
+      notnull: true
+      autoincrement: false
+    open_date:
+      type: date
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    type:
+      type: enum
+      values: ['ROTH','IRA','401K','RGLR']
+      fixed: false
+      unsigned: false
+      primary: false
+      default: RGLR
+      notnull: true
+      autoincrement: false
+    agency:
+      type: string(64)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: scottrade
+      notnull: true
+      autoincrement: false
+    user_id:
+      type: integer
+      notnull: true
+  indexes:
+    user_idx:
+      fields: ['user_id']
+  relations:
+    User:
+      class: sfGuardUser
+      local: user_id
+      type: one
+      foreignAlias: Accounts
+      onDelete: CASCADE
+Action:
+  connection: doctrine
+  tableName: action
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
+  columns:
+    name:
+      type: string(64)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+  relations:
+    Transaction:
+      local: id
+      foreign: action_id
+      type: many
+Price:
+  connection: doctrine
+  tableName: price
+  columns:
+    security_id:
+      type: integer
+      notnull: true
+    date:
+      type: date
+      notnull: true
+    cprice:
+      type: float
+    pchange:
+      type: float
+    ppchange:
+      type: float
+    open:
+      type: float
+    close:
+      type: float
+    high:
+      type: float
+    low:
+      type: float
+    volumn:
+      type: integer
+  actAs:
+    Timestampable:
+  relations:
+    Security:
+      local: security_id
+      foreign: id
+      type: one
+  indexes:
+    sdate:
+      fields: [security_id, date]
+      unique: true
+      primary: true
+
+Security:
+  connection: doctrine
+  tableName: security
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
+  columns:
+    symbol:
+      type: string(32)
+      fixed: false
+      notnull: true
+    market:
+      type: string(6)
+      fixed: false
+    google_id:
+      type: string(32)
+      fixed: false
+      unique: true
+    yahoo_id:
+      type: string(32)
+      fixed: false
+      unique: true
+    scottrade_id:
+      type: string(32)
+      fixed: false
+      unique: true
+    name:
+      type: string(64)
+      fixed: false
+  indexes:
+    ticker_idx:
+      fields: ['symbol','market']
+      type: unique
+  relations:
+    Price:
+      local: id
+      foreign: security_id
+      type: many
+    Transaction:
+      local: id
+      foreign: security_id
+      type: many
+
+Synthetic:
+  connection: doctrine
+  tableName: synthetic
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
+  columns:
+    name:
+      type: string(64)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: Cash
+      notnull: true
+      autoincrement: false
+    description:
+      type: text
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+  relations:
+    Transaction:
+      local: id
+      foreign: synthetic_id
+      type: many
+
+Transaction:
+  connection: doctrine
+  tableName: transaction
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
+  columns:
+    security_id:
+      type: integer
+      notnull: true
+    quantity:
+      type: float
+      default: '0.00'
+      notnull: true
+    price:
+      type: float
+      default: '0.00'
+      notnull: true
+    trade_date:
+      type: date
+      notnull: true
+    settled_date:
+      type: date
+      notnull: false
+    amount:
+      type: float
+      default: '0.00'
+      notnull: true
+    commission:
+      type: float
+      default: '0.00'
+      notnull: true
+    description:
+      type: string(255)
+      fixed: false
+      notnull: false
+    action_id:
+      type: integer
+      notnull: true
+    account_id:
+      type: integer
+      notnull: true
+    synthetic_id:
+      type: integer
+      notnull: false
+    total_quantity:
+      type: float
+      default: '0.00'
+      notnull: true
+    buy_price:
+      type: float
+    sell_price:
+      type: float
+    prev_tran:
+      type: integer
+      default: null
+      notnull: false
+  relations:
+    Transaction:
+      local: prev_tran
+      foreign: id
+      type: one
+    Account:
+      local: account_id
+      foreign: id
+      type: one
+      foreignType: many
+      foreignAlias: Transactions
+    Action:
+      local: action_id
+      foreign: id
+      type: one
+    Security:
+      local: security_id
+      foreign: id
+      type: one
+    Synthetic:
+      local: synthetic_id
+      foreign: id
+      type: one
+Alert:
+  actAs: [Timestampable]
+  columns:
+    max: float
+    min: float
+PriceAlert:
+  actAs: [Timestampable]
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
+  columns:
+    user_id:
+      type: integer
+      primary: true
+    alert_id:
+      type: integer
+      primary: true
+    security_id:
+      type: integer
+    description:
+      type: text
+  relations:
+    Alert:
+      class: Alert
+      local: alert_id
+      type: one
+      onDelete: CASCADE
+    Security:
+      class: Security
+      local: security_id
+      type: one
+      onDelete: CASCADE
+    User:
+      class: sfGuardUser
+      foreign: id
+      local: user_id
+      type: one  
+      onDelete: cascade    
+      foreignType: many
+      foreignAlias: PriceAlerts
+  indexes:
+    SU:
+      fields: [security_id, user_id]
+      type: unique
+

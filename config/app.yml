@@ -1,0 +1,22 @@
+# You can find more information about this file on the symfony website:
+# http://www.symfony-project.org/reference/1_4/en/11-App
+
+# default values
+#all:
+sfApplyPlugin:
+    from:
+      email: "alicia.x.tang@gmail.com"
+      fullname: "Alicia Tang"
+    # The default transport class, set explicitly as an example.
+    # This doesn't change often
+    mail_transport_class: Swift_SmtpTransport 
+    # Not the default
+    mail_transport_host: smtp.gmail.com
+    # Not the defaults either
+    mail_transport_options:
+    auth: login
+    username: alicia.x.tang@gmail.com
+    password: 'junesnow'
+    ssl: tls
+    port: 587
+

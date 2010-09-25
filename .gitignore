@@ -1,0 +1,8 @@
+config/databases.yml
+data/
+build_load.sh
+cache
+base/
+lib/vendor/
+log/
+plugins/
