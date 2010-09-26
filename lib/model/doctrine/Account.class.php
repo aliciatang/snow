@@ -16,4 +16,8 @@ class Account extends BaseAccount
   {
     return ucfirst($this->getAgency()).": ****".substr($this->getNumber(),-4);
   }
+  public function getDisplayNumber()
+  {
+    return "****".substr($this->getNumber(),-4);
+  }
 }
