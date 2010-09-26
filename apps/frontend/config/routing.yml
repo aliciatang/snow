@@ -1,3 +1,12 @@
+account:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                Account
+    module:               account
+    prefix_path:          /account
+    column:               id
+    with_wildcard_routes: true
+
 #sfGuard routes
 sf_guard_signin:
   url:   /login

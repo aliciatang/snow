@@ -96,19 +96,26 @@ Price:
       type: date
       notnull: true
     cprice:
-      type: float
+      type: decimal(16)
+      scale: 4
     pchange:
-      type: float
+      type: decimal(16)
+      scale: 4
     ppchange:
-      type: float
+      type: decimal(16)
+      scale: 4
     open:
-      type: float
+      type: decimal(16)
+      scale: 4
     close:
-      type: float
+      type: decimal(16)
+      scale: 4
     high:
-      type: float
+      type: decimal(16)
+      scale: 4
     low:
-      type: float
+      type: decimal(16)
+      scale: 4
     volumn:
       type: integer
   actAs:
@@ -225,11 +232,12 @@ Transaction:
       type: integer
       notnull: true
     quantity:
-      type: float
-      default: '0.00'
+      type: integer
+      default: '0'
       notnull: true
     price:
-      type: float
+      type: decimal(16)
+      scale: 4
       default: '0.00'
       notnull: true
     trade_date:
@@ -239,11 +247,13 @@ Transaction:
       type: date
       notnull: false
     amount:
-      type: float
+      type: decimal(16)
+      scale: 4
       default: '0.00'
       notnull: true
     commission:
-      type: float
+      type: decimal(16)
+      scale: 4
       default: '0.00'
       notnull: true
     description:
@@ -259,14 +269,38 @@ Transaction:
     synthetic_id:
       type: integer
       notnull: false
-    total_quantity:
-      type: float
+    total_amount:
+      type: decimal(16)
+      scale: 4
       default: '0.00'
       notnull: true
-    buy_price:
-      type: float
-    sell_price:
-      type: float
+    total_quantity:
+      type: integer
+      default: '0'
+      notnull: true
+    total_buy_amount:
+      type: decimal(16)
+      scale: 4
+      default: '0'
+      notnull: true
+    total_buy_quantity:
+      type: integer
+      default: '0'
+      notnull: true
+    total_sell_amount:
+      type: decimal(16)
+      scale: 4
+      default: '0'
+      notnull: true
+    total_sell_quantity:
+      type: integer
+      default: '0'
+      notnull: true
+    total_other_amount:
+      type: decimal(16)
+      scale: 4
+      default: '0.00'
+      notnull: true
     prev_tran:
       type: integer
       default: null
@@ -297,8 +331,12 @@ Transaction:
 Alert:
   actAs: [Timestampable]
   columns:
-    max: float
-    min: float
+    max: 
+      type: decimal(16)
+      scale: 4
+    min: 
+      type: decimal(16)
+      scale: 4
 PriceAlert:
   actAs: [Timestampable]
   options:

@@ -13,7 +13,7 @@ class AccountTable extends Doctrine_Table
       $q = Doctrine_Query::create()
           ->from('Account a')
           ->leftJoin('a.Transactions t')
-          ->orderBy('t.trade_date')
+          ->orderBy('t.security_id,t.trade_date')
           ;
       return $q->execute();
     }

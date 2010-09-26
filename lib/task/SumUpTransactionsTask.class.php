@@ -46,15 +46,51 @@ EOF;
         continue;
       }
       $pre_tran = null;
+      $cur_sec = null;
+      $total_amount = 0;
+      $total_quantity = 0;
+      $total_buy_amount = 0;
+      $total_buy_quantity = 0;
+      $total_sell_amount = 0;
+      $total_sell_quantity = 0;
+      $total_other_amount = 0;
       foreach($account->Transactions as $tran)
       {
-        $tran->setTransaction($pre_tran);
-        
-        $tran->total_quantity += is_null($pre_tran)?0:$pre_tran->total_quantity;
-        
-        $pre_tran = $tran;
+        if($tran->security_id != $cur_sec)
+        {
+          $tran->setTransaction(null);
+          $total_amount = $tran->amount;
+          $total_quantity = $tran->quantity;
+          $total_buy_amount = ($tran->quantity > 0)?$tran->amount:0;
+          $total_buy_quantity = ($tran->quantity > 0)?$tran->quantity:0;
+          $total_sell_amount = ($tran->quantity < 0)?$tran->amount:0;
+          $total_sell_quantity = ($tran->quantity < 0)?$tran->quantity:0;
+          $total_other_amount = ($tran->quantity == 0)?$tran->amount:0;
+              
+          $cur_sec = $tran->security_id;
+        }
+        else
+        {
+          $tran->setTransaction($pre_tran);
+          $total_amount += $tran->amount;
+          $total_quantity += $tran->quantity;
+          $total_buy_amount += ($tran->quantity > 0)?$tran->amount:0;
+          $total_buy_quantity += ($tran->quantity > 0)?$tran->quantity:0;
+          $total_sell_amount += ($tran->quantity < 0)?$tran->amount:0;
+          $total_sell_quantity += ($tran->quantity < 0)?$tran->quantity:0;
+          $total_other_amount += ($tran->quantity == 0)?$tran->amount:0;
+        }
+        $tran->total_amount = $total_amount;
+        $tran->total_quantity = $total_quantity;
+        $tran->total_buy_amount = $total_buy_amount;
+        $tran->total_buy_quantity = $total_buy_quantity;
+        $tran->total_sell_amount = $total_sell_amount;
+        $tran->total_sell_quantity = $total_sell_quantity;
+        $tran->total_other_amount = $total_other_amount;
+
+        $pre_tran = $tran;        
       }
-      //$account->save();
+      $account->save();
       $this->logSection('sum', "Done computing records for account(".$account->getDisplayName().").");
     }
   }
