@@ -12,4 +12,14 @@
  */
 class AccountSecurity extends BaseAccountSecurity
 {
+  public function getAvgBuyPrice()
+  {
+    if($this->getBuyQuantity()==0)return 0;
+    return (-1)*floatval($this->getBuyAmount())/intval($this->getBuyQuantity());
+  }
+  public function getAvgSellPrice()
+  {
+    if($this->getSellQuantity()==0)return 0;
+    return (-1)*floatval($this->getSellAmount())/intval($this->getSellQuantity());
+  }
 }

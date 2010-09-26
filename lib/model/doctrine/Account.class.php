@@ -12,6 +12,8 @@
  */
 class Account extends BaseAccount
 {
+  public $amount;
+  public $deposit;
   public function getDisplayName()
   {
     return ucfirst($this->getAgency()).": ****".substr($this->getNumber(),-4);

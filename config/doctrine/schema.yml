@@ -46,6 +46,12 @@ Account:
       default: scottrade
       notnull: true
       autoincrement: false
+    last_record:
+      type: timestamp
+      default: null
+    last_compute:
+      type: timestamp
+      default: null
     user_id:
       type: integer
       notnull: true
@@ -184,6 +190,24 @@ AccountSecurity:
     security_id:
       type: integer
       primary: true
+    quantity:
+      type: integer
+      default: 0
+    buy_quantity:
+      type: integer
+      default: 0
+    sell_quantity:
+      type: integer
+      default: 0
+    buy_amount:
+      type: decimal(16)
+      scale: 4
+    sell_amount:
+      type: decimal(16)
+      scale: 4
+    other_amount:
+      type: decimal(16)
+      scale: 4
   relations:
     Account:
       local: account_id
@@ -193,6 +217,10 @@ AccountSecurity:
       local: security_id
       foreign: id
       foreignAlias: AccountSecurities 
+  indexes:
+    as_idx:
+      fields: [account_id,security_id]
+      type: unique
 Synthetic:
   connection: doctrine
   tableName: synthetic

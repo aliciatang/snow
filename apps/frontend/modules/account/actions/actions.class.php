@@ -17,6 +17,7 @@ class accountActions extends sfActions
   */
   public function executeIndex(sfWebRequest $request)
   {
-    $this->accounts = $this->getUser()->getGuardUser()->getAccounts();
+    //accounts ia an array not a doctrine_collection 
+    $this->accounts = $this->getUser()->getGuardUser()->getAccountsWithAccountSecurities();
   }
 }

@@ -85,6 +85,7 @@ EOF;
       $transaction->Account = $account;
     }
     $reader->close();
+    $account->setLastRecord(date('Y-m-d H:i:s'));
     $account->save();
     $this->logSection('loadCsv', $count.' transactions loaded.');
     

@@ -12,4 +12,47 @@
  */
 class sfGuardUser extends PluginsfGuardUser
 {
+  public function getAccountsWithTransactions()
+  {
+    $q = Doctrine_Query::create()
+        ->from('Account a')
+        ->leftJoin('a.Transactions t')
+        ->orderBy('t.security_id,t.trade_date')
+        ->where('a.user_id = ?', $this->getId())
+        ;
+    return $q->execute();
+  }
+  public function getAccountsWithSecurities()
+  {
+    $q = Doctrine_Query::create()
+        ->from('Account a')
+        ->leftJoin('a.Securities s')
+        ->where('a.user_id = ?', $this->getId())
+        ;
+    return $q->execute();
+  }
+  public function getAccountsWithAccountSecurities()
+  {
+    $q = Doctrine_Query::create()
+        ->from('Account a')
+        ->leftJoin('a.AccountSecurities s')
+        ->leftJoin('s.Security ss')
+        ->where('a.user_id = ?', $this->getId())
+        ->orderBy('a.id,s.quantity')
+        ;
+    $ret = $q->fetchArray();
+    foreach($ret as $i=>$a)
+    {
+      $ret[$i]['amount'] = 0;
+      $ret[$i]['number'] = "****".substr($a['number'],-4);
+      foreach($a['AccountSecurities'] as $j=>$s)
+      {
+        $ret[$i]['amount'] += $s['buy_amount']+$s['sell_amount']+$s['other_amount'];
+        $ret[$i]['AccountSecurities'][$j]['avg_buy_price']=(!$s['buy_quantity'])?0:(floatval($s['buy_amount'])/intval($s['buy_quantity']));
+        $ret[$i]['AccountSecurities'][$j]['avg_sell_price']=(!$s['sell_quantity'])?0:(floatval($s['sell_amount'])/intval($s['sell_quantity']));
+        if($s['security_id'] == '7')$ret[$i]['deposit'] = $s['other_amount'];
+      }
+    }
+    return $ret;
+  }
 }
