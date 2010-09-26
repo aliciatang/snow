@@ -8,4 +8,13 @@ class AccountTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Account');
     }
+    public static function getAllWithTransactions()
+    {
+      $q = Doctrine_Query::create()
+          ->from('Account a')
+          ->leftJoin('a.Transactions t')
+          ->orderBy('t.trade_date')
+          ;
+      return $q->execute();
+    }
 }

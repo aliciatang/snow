@@ -36,5 +36,26 @@ EOF;
     $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
 
     // add your code here
+    $this->logSection('sum', "starting for user:".$options['user']);
+    $accounts = AccountTable::getAllWithTransactions();
+    foreach($accounts as $account)
+    {
+      if(!$account->Transactions->count())
+      {
+        $this->logSection('sum', "No records for account(".$account->getDisplayName().").");
+        continue;
+      }
+      $pre_tran = null;
+      foreach($account->Transactions as $tran)
+      {
+        $tran->setTransaction($pre_tran);
+        
+        $tran->total_quantity += is_null($pre_tran)?0:$pre_tran->total_quantity;
+        
+        $pre_tran = $tran;
+      }
+      //$account->save();
+      $this->logSection('sum', "Done computing records for account(".$account->getDisplayName().").");
+    }
   }
 }

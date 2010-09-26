@@ -66,6 +66,7 @@ EOF;
       // Do something with $data['column_A'] and $data['column_B'];
       $sercurity = SecurityTable::findOneByScottradeId($data['Symbol']);
       $sercurity->save();
+      $account->Securities[] = $sercurity;
       $action = ActionTable::findOneByIdName($data['ActionId'],$data['ActionNameUS']);
       $action->save();
       

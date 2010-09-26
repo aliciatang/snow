@@ -59,8 +59,15 @@ Account:
       type: one
       foreignAlias: Accounts
       onDelete: CASCADE
+    Securities:
+      foreignAlias: Accounts
+      class: Security
+      refClass: AccountSecurity
 Action:
   connection: doctrine
+  options:
+    collate: utf8_unicode_ci
+    charset: utf8
   tableName: action
   options:
     collate: utf8_unicode_ci
@@ -116,7 +123,6 @@ Price:
       fields: [security_id, date]
       unique: true
       primary: true
-
 Security:
   connection: doctrine
   tableName: security
@@ -159,7 +165,27 @@ Security:
       local: id
       foreign: security_id
       type: many
-
+AccountSecurity:
+  options:
+    symfony:
+      form:   false
+      filter: false
+  columns:
+    account_id:
+      type: integer
+      primary: true
+    security_id:
+      type: integer
+      primary: true
+  relations:
+    Account:
+      local: account_id
+      foreign: id
+      foreignAlias: AccountSecurities
+    Security:
+      local: security_id
+      foreign: id
+      foreignAlias: AccountSecurities 
 Synthetic:
   connection: doctrine
   tableName: synthetic
