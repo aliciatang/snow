@@ -16,7 +16,7 @@
     <?php foreach ($price_alerts as $price_alert): ?>
     <tr>
       <td><?php echo $price_alert->getSecurity()->getName() ?></td>
-      <td><?php echo $price_alert->getSecurity()->getCprice()->getCprice() ?></td>
+      <td><?php echo $price_alert->getSecurity()->getCprice() ?></td>
       <td><?php echo $price_alert->getAlert()->getMin() ?></td>
       <td><?php echo $price_alert->getAlert()->getMax() ?></td>
       <td><?php echo $price_alert->getDescription() ?></td>

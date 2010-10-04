@@ -10,9 +10,13 @@ class SecurityTable extends Doctrine_Table
     }
     public static function loadPrice()
     {
-        $yahoo = new Yahoo();
-        $list = self::getInstance()->findAll();
-        return $yahoo->loadPrices($list);
+      $q = Doctrine_Query::create()
+          ->from('Security s')
+          ->where('s.market <> ?', 'OPTION')
+          ->andWhere('s.id > ?', 1)
+          ;
+      $list = $q->fetchArray();
+      return Yahoo::loadPrices($list);
     }
     public function findOneByScottradeId($symbol)
     {

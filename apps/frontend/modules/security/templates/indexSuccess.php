@@ -4,6 +4,8 @@
     <th>Shares</th>
     <th>Buy Price</th>
     <th>Price</th>
+    <th>Market Value</th>
+    <th>Gain</th>
     <th>Dividend</th>
   </thead>
   <tbody>
@@ -17,7 +19,9 @@
         </div>
       </td>
       <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
-      <td><?php ?></td>
+      <td><?php echo number_format($s['cprice'],2)?></td>
+      <td><?php echo number_format($s['mkt_value'],2)?></td>
+      <td><?php echo number_format($s['gain'],2)?></td>
       <td><?php echo number_format($s['dividend'],2)?></td>
     </tr>
 <?php endforeach;?>
@@ -40,7 +44,7 @@
       <td><?php echo $s['buy_quantity']?></td>
       <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
       <td><?php echo $s['sell_quantity']?number_format($s['sell_amount']/$s['sell_quantity'],2):'--'?></td>
-      <td><?php echo number_format($s['gain'],2)?></td>
+      <td><?php echo number_format($s['gain'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['gain']*100/$s['buy_amount']):0,2) ?>%)</td>
       <td><?php echo number_format($s['dividend'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['dividend']*100/$s['buy_amount']):0,2) ?>%)</td>
       <td><?php echo number_format($s['amount'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['amount']*100/$s['buy_amount']):0,2) ?>%)</td>
     </tr>

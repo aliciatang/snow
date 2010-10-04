@@ -19,5 +19,6 @@ class accountActions extends sfActions
   {
     //accounts ia an array not a doctrine_collection  
     $this->accounts = $this->getUser()->getGuardUser()->getAccountsWithAccountSecurities();
+    //SecurityTable::loadPrice();
   }
 }

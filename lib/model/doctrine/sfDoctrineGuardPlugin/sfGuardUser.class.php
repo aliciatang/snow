@@ -60,26 +60,34 @@ class sfGuardUser extends PluginsfGuardUser
     $q = Doctrine_Query::create()
         ->select('s.symbol')
         ->addSelect('SUM(as.quantity) as quantity')
-        ->addSelect('SUM(as.buy_quantity) as buy_quantity')
+        ->addSelect('SUM(as.buy_quantity) as buy_quantity')        
         ->addSelect('SUM(as.sell_quantity)*(-1) as sell_quantity')
         ->addSelect('SUM(as.buy_amount)*(-1) as buy_amount')
         ->addSelect('SUM(as.sell_amount) as sell_amount')
-        ->addSelect('SUM(as.sell_amount + as.buy_amount) as gain')
         ->addSelect('SUM(as.sell_amount + as.buy_amount + as.other_amount) as amount')
         ->addSelect('SUM(as.other_amount) as dividend')
         ->from('Security s')
         ->leftJoin('s.AccountSecurities as')
         ->leftJoin('as.Account a')
-        ->where('a.user_id = ?', $this->getId())
-        ->orderBy('quantity')
+        ->where('a.user_id = ? AND s.id > ?', array($this->getId(),1))
         ->groupBy('s.id')
+        ->orderBy('gain DESC') 
         ;
     switch($state)
     {
       case 'current':
-        $q->having('quantity <> ?', 0 );break;
+        $q->leftJoin('s.Price p')
+          ->addSelect('p.cprice as cprice, p.date')
+          ->addSelect('p.cprice*SUM(as.quantity) as mkt_value')
+          ->addSelect('p.cprice*SUM(as.quantity)+SUM(as.sell_amount + as.buy_amount) as gain')
+          ->having('quantity <> ? AND p.date = MAX(p.date)', array('0') )
+          ;
+        break;
       case 'history':
-        $q->having('quantity = ?', 0 );break;
+        $q->having('quantity = ?', 0 )
+          ->addSelect('SUM(as.sell_amount + as.buy_amount) as gain')
+          ;
+        break;
       default:
         break;
     }

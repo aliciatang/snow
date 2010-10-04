@@ -19,6 +19,5 @@ class securityActions extends sfActions
   {
     $this->csecurities = $this->getUser()->getGuardUser()->getSecurities();
     $this->hsecurities = $this->getUser()->getGuardUser()->getSecurities('history');
-    
   }
 }

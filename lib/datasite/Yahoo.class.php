@@ -23,7 +23,7 @@ class Yahoo
     $symbols='';
     foreach($list as $security)
     {
-      $symbols.=$security->yahoo_id.',';
+      $symbols.=$security['yahoo_id'].',';
     }
     $url = self::$stockUrl.self::$tabs['daywatch'].$symbols;
     $content = file_get_contents($url);
@@ -53,8 +53,11 @@ class Yahoo
       $ret['avgValumn']=intval(str_replace(',','',$cols->item(6)->nodeValue ));
       $ret['open'] = floatval( $cols->item(7)->nodeValue );
       $rang = $cols->item(8)->getElementsByTagName('span');
-      $ret['low']= floatval( $rang->item(0)->nodeValue );
-      $ret['high']= floatval( $rang->item(3)->nodeValue );
+      if($rang->length > 3)
+      {
+        $ret['low']= floatval( $rang->item(0)->nodeValue );
+        $ret['high']= floatval( $rang->item(3)->nodeValue );
+      }
       $fret[]=$ret;
       $price = (is_Object($price))?$price:new Price();
       $price->fromArray($ret);
