@@ -12,9 +12,14 @@ default:
     #language:     en
     #robots:       index, follow
 
-  stylesheets:    [main.css]
+  stylesheets: 
+    - css960/reset: { media: all }
+    - css960/960: { media: all }
+    - css960/text: { media: all }
+    - main
 
-  javascripts:    []
+  javascripts:
+    - jQuery/jquery-1.4.2.js
 
   has_layout:     true
   layout:         layout

@@ -1,6 +1,6 @@
 <h1>Your Account List</h1>
 
-<table>
+<table id="account-list" class="expandContainer">
   <thead>
     <tr>
       <th>Account</th>
@@ -12,11 +12,11 @@
   </thead>
   <tbody>
     <?php foreach ($accounts as $account): ?>
-    <tr>
+    <tr class="expandable">
       <td><?php echo $account['number'] ?></td>
       <td><?php echo $account['type'] ?></td>
-      <td><?php echo isset($account['amount'])?$account['amount']:0 ?></td>
-      <td><?php echo isset($account['deposit'])?$account['deposit']:0 ?></td>
+      <td><?php echo number_format(isset($account['amount'])?$account['amount']:0,2) ?></td>
+      <td><?php echo number_format(isset($account['deposit'])?$account['deposit']:0,2) ?></td>
       <td><?php echo date('Y-m-d',strtotime($account['last_record'])) ?></td>
     </tr>
     <tr>
@@ -26,5 +26,15 @@
     </tr>
     <?php endforeach; ?>
   </tbody>
+  <tfoot>
+    <td colspan="5">
+    <a href="<?php echo url_for('account/new') ?>">Add a new account</a>
+    </td>
+  </tfoot>
 </table>
-<a href="<?php echo url_for('account/new') ?>">New</a>
+<?php slot('jQuery') ?>
+$('tr.expandable').click(function() {
+		$(this).next().toggle();
+		return false;
+}).next().hide();
+<?php end_slot()?>

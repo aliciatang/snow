@@ -7,8 +7,24 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <?php include_stylesheets() ?>
     <?php include_javascripts() ?>
+    <script type="text/javascript">/* <![CDATA[ */
+    <?php if (has_slot('jQuery')): ?>
+      jQuery(document).ready(function(){
+      	<?php include_slot('jQuery');?>
+      });
+    <?php endif;?>
+    /* ]]> */</script>
   </head>
   <body>
-    <?php echo $sf_content ?>
+    <div class="container_12">
+      <?php include_partial('global/header')?>
+      <div id="content" class="grid_8 alpha">
+      <?php echo $sf_content ?>
+      </div>
+      <div id="sidebar" class="grid_4 alpha">
+      <?php include_slot('sidebar')?>
+      </div>
+    <?php include_partial('global/footer')?>
+    </div>
   </body>
 </html>

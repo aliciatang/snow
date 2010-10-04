@@ -1,6 +1,10 @@
 PHP Project using symfony frame work version 1.4
+
 Required symfony plugins
 1.sfCsvPlugin
 2.sfDoctrineApplyPlugin
 3.sfDoctrineGuardLoginHistoryPlugin
 4.sfDoctrineGuardPlugin
+
+Optional symfony plugins
+1.swFunctionalTestGenerationPlugin

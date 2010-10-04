@@ -55,4 +55,32 @@ class sfGuardUser extends PluginsfGuardUser
     }
     return $ret;
   }
+  public function getSecurities( $state='current')
+  {
+    $q = Doctrine_Query::create()
+        ->select('s.symbol')
+        ->addSelect('SUM(as.quantity) as quantity')
+        ->addSelect('SUM(as.buy_quantity) as buy_quantity')
+        ->addSelect('SUM(as.sell_quantity)*(-1) as sell_quantity')
+        ->addSelect('SUM(as.buy_amount) as buy_amount')
+        ->addSelect('SUM(as.sell_amount) as sell_amount')
+        ->from('Security s')
+        ->leftJoin('s.AccountSecurities as')
+        ->leftJoin('as.Account a')
+        ->where('a.user_id = ?', $this->getId())
+        ->orderBy('quantity')
+        ->groupBy('s.id')
+        ;
+    switch($state)
+    {
+      case 'current':
+        $q->having('quantity <> ?', 0 );break;
+      case 'history':
+        $q->having('quantity = ?', 0 );break;
+      default:
+        break;
+    }
+    $ret = $q->fetchArray();
+    return $ret;
+  }
 }

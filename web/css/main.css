@@ -1,0 +1,96 @@
+#header
+{
+	font-family:Verdana,sans-serif;
+	font-size:16px;
+}
+#logo
+{
+	font-family:Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
+	font-size:28px;
+	color:#617f10;
+	font-weight:bold;
+}
+#greeting span
+{
+	font-family:arial;
+	font-size:14px;
+	color:black;
+	border:1px solid #d4d4d4;
+	padding:5px;
+	margin:5px 5px;
+}
+#footer
+{
+	color:#666;
+	font-family:helvetica,arial,freesans,clean,sans-serif;
+	font-size:12px;
+	text-align:center;
+}
+h1
+{
+	color:#92b901;
+	font-family:arial;
+	font-size:24px;
+	font-weight:bolder;
+}
+table
+{
+	background-image:url("/images/bgfadegreen.gif");
+  border-collapse:collapse;
+	background-color:#E5EECC;
+	background-repeat:repeat-x;
+	border:1px solid #d4d4d4;
+}
+table.expandContainer th,table.expandContainer td
+{
+	border-bottom:1px solid #d4d4d4;
+}
+tr, td, th
+{
+	text-align:center;
+	background-color:transparent;
+}
+tr:hover
+{
+	background-color:orange;
+}
+tbody td
+{
+  border-bottom:1px solid #EEE;
+  padding:2px 5px;
+}
+tr.expandable
+{
+	/* for IE */
+	filter:alpha(opacity=60);
+	 /* CSS3 standard */
+	opacity:0.6;
+}
+tr.expandable:nth-child(even) 
+{
+	background-color:#EEE;
+}
+tr.expandable:nth-child(odd) {
+	background: #FFF
+}
+thead th
+{
+  background-color:transparent;
+  color:#617F10;
+	padding:5px 10px;
+}
+
+table.expandTable
+{
+	-moz-border-radius:8px;
+	-moz-box-shadow:0 1px 0 rgba(0,0,0,0.2) inset, 0 1px 0 rgba(255,255,255,0.3);
+}
+table.expandTable th
+{
+	background:#39a89d;
+}
+tr.expandable
+{
+	cursor:hand;
+	cursor:pointer;
+}

@@ -2,7 +2,7 @@
   <?php echo "No record."?>
 <?php else:?>
 <?php   //var_dump($securities);?>
-  <table>
+  <table class="expandTable">
     <thead>
       <tr>
         <th>Symbol</th>
