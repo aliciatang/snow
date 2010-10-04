@@ -7,3 +7,6 @@ lib/vendor/
 log/
 plugins/
 !data/fixture/security.yml
+web/css/css960/
+.DS_Store
+web/js/jQuery/
