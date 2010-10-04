@@ -17,6 +17,8 @@ class securityActions extends sfActions
   */
   public function executeIndex(sfWebRequest $request)
   {
-    $this->securities = $this->getUser()->getGuardUser()->getSecurities('all');
+    $this->csecurities = $this->getUser()->getGuardUser()->getSecurities();
+    $this->hsecurities = $this->getUser()->getGuardUser()->getSecurities('history');
+    
   }
 }

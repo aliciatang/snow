@@ -2,8 +2,31 @@
   <thead>
     <th>Symbol</th>
     <th>Shares</th>
-    <th>Shares Bought</th>
-    <th>Shares Sold</th>
+    <th>Buy Price</th>
+    <th>Price</th>
+    <th>Dividend</th>
+  </thead>
+  <tbody>
+<?php foreach($csecurities as $s):?>
+    <tr>
+      <td><?php echo $s['symbol']?></td>
+      <td class="shares"><?php echo $s['quantity']?>
+        <div>
+          <span class="buy_q"><?php echo $s['buy_quantity']?></span>
+          <span class="sell_q"><?php echo $s['sell_quantity']?></span>
+        </div>
+      </td>
+      <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
+      <td><?php ?></td>
+      <td><?php echo number_format($s['dividend'],2)?></td>
+    </tr>
+<?php endforeach;?>
+  </tbody>
+</table>
+<table>
+  <thead>
+    <th>Symbol</th>
+    <th>Shares</th>
     <th>Buy Price</th>
     <th>Sell Price</th>
     <th>Gain</th>
@@ -11,17 +34,15 @@
     <th>Total Gain</th>
   </thead>
   <tbody>
-<?php foreach($securities as $s):?>
+<?php foreach($hsecurities as $s):?>
     <tr>
       <td><?php echo $s['symbol']?></td>
-      <td><?php echo $s['quantity']?></td>
       <td><?php echo $s['buy_quantity']?></td>
-      <td><?php echo $s['sell_quantity']?></td>
       <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
       <td><?php echo $s['sell_quantity']?number_format($s['sell_amount']/$s['sell_quantity'],2):'--'?></td>
-      <td><?php echo number_format($s['gain'])?></td>
-      <td><?php echo number_format($s['dividend'])?></td>
-      <td><?php echo number_format($s['amount'])?></td>
+      <td><?php echo number_format($s['gain'],2)?></td>
+      <td><?php echo number_format($s['dividend'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['dividend']*100/$s['buy_amount']):0,2) ?>%)</td>
+      <td><?php echo number_format($s['amount'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['amount']*100/$s['buy_amount']):0,2) ?>%)</td>
     </tr>
 <?php endforeach;?>
   </tbody>

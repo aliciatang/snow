@@ -50,7 +50,7 @@ class sfGuardUser extends PluginsfGuardUser
         $ret[$i]['amount'] += $s['buy_amount']+$s['sell_amount']+$s['other_amount'];
         $ret[$i]['AccountSecurities'][$j]['avg_buy_price']=(!$s['buy_quantity'])?0:(floatval($s['buy_amount'])/intval($s['buy_quantity']));
         $ret[$i]['AccountSecurities'][$j]['avg_sell_price']=(!$s['sell_quantity'])?0:(floatval($s['sell_amount'])/intval($s['sell_quantity']));
-        if($s['security_id'] == '7')$ret[$i]['deposit'] = $s['other_amount'];
+        if($s['security_id'] == '1')$ret[$i]['deposit'] = $s['other_amount'];
       }
     }
     return $ret;
@@ -62,7 +62,7 @@ class sfGuardUser extends PluginsfGuardUser
         ->addSelect('SUM(as.quantity) as quantity')
         ->addSelect('SUM(as.buy_quantity) as buy_quantity')
         ->addSelect('SUM(as.sell_quantity)*(-1) as sell_quantity')
-        ->addSelect('SUM(as.buy_amount) as buy_amount')
+        ->addSelect('SUM(as.buy_amount)*(-1) as buy_amount')
         ->addSelect('SUM(as.sell_amount) as sell_amount')
         ->addSelect('SUM(as.sell_amount + as.buy_amount) as gain')
         ->addSelect('SUM(as.sell_amount + as.buy_amount + as.other_amount) as amount')
