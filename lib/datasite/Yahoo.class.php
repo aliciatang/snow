@@ -26,6 +26,12 @@ class Yahoo
       $symbols.=$security['yahoo_id'].',';
     }
     $url = self::$stockUrl.self::$tabs['daywatch'].$symbols;
+    if (sfConfig::get('sf_logging_enabled'))
+    {
+      sfContext::getInstance()->getLogger()->info($url);
+      
+    }
+    echo $url."\n";
     $content = file_get_contents($url);
     $start = stripos($content,'yfi_columnar_table',1000);
     $start = stripos($content,'>',$start)+1;
@@ -43,6 +49,11 @@ class Yahoo
       $cols = $row->getElementsByTagName('td');
       $ret = array();
       $ret['yahoo_id']= $cols->item(0)->nodeValue;
+      if (sfConfig::get('sf_logging_enabled'))
+      {
+        sfContext::getInstance()->getLogger()->info("loading data for ".$ret['yahoo_id']);
+      }
+      echo $ret['yahoo_id'];
       $s = SecurityTable::getInstance()->findOneByYahoo_id($ret['yahoo_id']);
       $ret['date'] = date('Y-m-j',strtotime($cols->item(1)->nodeValue.",".date('Y')));
       $price = PriceTable::findOneBySdate($s->id,$ret['date']);
@@ -63,6 +74,11 @@ class Yahoo
       $price->fromArray($ret);
       $price->Security = SecurityTable::getInstance()->findOneByYahoo_id($ret['yahoo_id']);
       $price->save();
+      if (sfConfig::get('sf_logging_enabled'))
+      {
+        sfContext::getInstance()->getLogger()->info("... done loading data for ".$ret['yahoo_id']);
+      }
+      echo " ... done.\n";
     }
     return $fret;
   }
