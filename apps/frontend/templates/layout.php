@@ -16,15 +16,17 @@
     /* ]]> */</script>
   </head>
   <body>
+    <?php include_partial('global/header')?>
+    <div id="body_back">
     <div class="container_12">
-      <?php include_partial('global/header')?>
       <div id="content" class="grid_8 alpha">
-      <?php echo $sf_content ?>
+	<?php echo $sf_content ?>
       </div>
       <div id="sidebar" class="grid_4 alpha">
       <?php include_slot('sidebar')?>
       </div>
-    <?php include_partial('global/footer')?>
     </div>
+    </div>
+    <?php include_partial('global/footer')?>
   </body>
 </html>

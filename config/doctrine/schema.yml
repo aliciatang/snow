@@ -404,4 +404,42 @@ PriceAlert:
     SU:
       fields: [security_id, user_id]
       type: unique
+Performance:
+  columns:
+     account_id:
+       type: integer
+       primary: true
+     date: 
+       type: date
+       notnull: true
+     total_deposit:
+       type: decimal(16)
+       scale: 4
+       default: '0.00'
+       notnull: true
+     cash_balance:
+       type: decimal(16)
+       scale: 4
+       default: '0.00'
+       notnull: true
+     security_market_value:
+       type: decimal(16)
+       scale: 4
+       default: '0.00'
+       notnull: true
+     total_market_value:
+       type: decimal(16)
+       scale: 4
+       default: '0.00'
+       notnull: true
+     time_weighted_return:
+       type: decimal(16)
+       scale: 4
+       default: '0.00'
+       notnull: true
+     gain:
+       type: decimal(16)
+       scale: 4
+       default: '0.00'
+       notnull: true
 

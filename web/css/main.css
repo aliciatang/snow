@@ -1,3 +1,14 @@
+#header_back, #footer_back, #body_back
+{
+	width: 100%;
+	float: left;
+}
+#header_back, #footer_back
+{
+	background: url("/images/background-v2.png")  repeat-x scroll left 0 transparent;
+	height: 91px;
+}
+
 #header
 {
 	font-family:Verdana,sans-serif;
