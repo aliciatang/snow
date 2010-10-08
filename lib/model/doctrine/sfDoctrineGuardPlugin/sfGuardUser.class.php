@@ -100,6 +100,26 @@ class sfGuardUser extends PluginsfGuardUser
     }
     //var_dump($q->getSqlQuery());
     $ret = $q->fetchArray();
+    $cash = Doctrine_Query::create()
+            ->addSelect('SUM(as.sell_amount + as.buy_amount + as.other_amount) as amount')
+            ->from('Account a')
+            ->leftJoin('a.AccountSecurities as')
+            ->leftJoin('as.Security s')
+            ->where('a.user_id = ?', array($this->getId()))
+            ->fetchArray();
+    $cash=$cash[0];
+    $cash['symbol'] = 'Cash';
+    $cash['quantity']=$cash['amount'];
+    $cash['mkt_value']=$cash['amount'];
+    $cash['gain']=0;
+    $cash['dividend']=0;
+    $cash['buy_quantity'] = 1;
+    $cash['sell_quantity'] = 1;
+    $cash['buy_amount'] = 0;
+    $cash['sell_amount'] = 0;
+    $cash['cprice'] = 1;
+    $ret[]=$cash;
+    
     $total = array();
     $total['symbol'] = 'Total';
     $total['quantity'] = 0;
@@ -130,6 +150,7 @@ class sfGuardUser extends PluginsfGuardUser
         case 'history':break;
       }
     }
+    
     $ret[]=$total;
     return $ret;
   }
