@@ -9,14 +9,10 @@
     <th>Dividend</th>
   </thead>
   <tbody>
-<?php foreach($csecurities as $s):?>
+<?php foreach($csecurities as $key =>$s):?>
     <tr>
       <td><?php echo $s['symbol']?></td>
       <td class="shares"><?php echo $s['quantity']?>
-        <div>
-          <span class="buy_q"><?php echo $s['buy_quantity']?></span>
-          <span class="sell_q"><?php echo $s['sell_quantity']?></span>
-        </div>
       </td>
       <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
       <td><?php echo number_format($s['cprice'],2)?></td>

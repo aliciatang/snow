@@ -4,7 +4,7 @@
 prod:
   .settings:
     no_script_name:         true
-    logging_enabled:        false
+    logging_enabled:        true 
 
 dev:
   .settings:
@@ -25,7 +25,7 @@ test:
 all:
   .settings:
     i18n: on
-    default_culture: zh_US
+    default_culture: en_US
     # Form security secret (CSRF protection)
     csrf_secret:            c10f06173c3ce0b25787e537694fabce4d8fcb19
 

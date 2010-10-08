@@ -2,6 +2,7 @@
 class Yahoo
 {
   private static $stockUrl='http://finance.yahoo.com/';
+  public static $historyUrl = 'http://ichart.finance.yahoo.com/table.csv?';
   private static $tabs=array(
     'summary'=>'q?d=s&s=',
     'realtime'=>'q/cq?d=e&s=',
@@ -81,6 +82,24 @@ class Yahoo
       echo " ... done.\n";
     }
     return $fret;
+  }
+  public static function historyPrices($symbol,$start,$end)
+  {
+    $url = self::$historyUrl."&s=".$symbol;
+    $min = min($start,$end);
+    $max = max($start,$end);
+    $url .= "&a=".date('j',strtotime($min));
+    $url .= "&b=".date('d',strtotime($min));
+    $url .= "&c=".date('Y',strtotime($min));
+    
+    $url .= "&d=".date('j',strtotime($max));
+    $url .= "&e=".date('d',strtotime($max));
+    $url .= "&f=".date('Y',strtotime($max));
+    $url .= '&g=d';
+    $url .= '&ignore=.csv';
+    echo $url;
+    $content = file_get_contents($url);
+    
   }
 }
 ?>

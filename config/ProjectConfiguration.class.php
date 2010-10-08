@@ -15,5 +15,6 @@ class ProjectConfiguration extends sfProjectConfiguration
     $this->enablePlugins('sfDoctrineGuardLoginHistoryPlugin');
     $this->enablePlugins('sfCsvPlugin');
     $this->enablePlugins('swFunctionalTestGenerationPlugin');
+    $this->enablePlugins('sfErrorNotifierPlugin');
   }
 }

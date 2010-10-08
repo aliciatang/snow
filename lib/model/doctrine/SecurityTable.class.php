@@ -12,7 +12,9 @@ class SecurityTable extends Doctrine_Table
     {
       $q = Doctrine_Query::create()
           ->from('Security s')
+          ->leftJoin('s.AccountSecurities as')
           ->where('s.market <> ?', 'OPTION')
+          ->andWhere('as.quantity > ?', 0)
           ->andWhere('s.id > ?', 1)
           ;
       $list = $q->fetchArray();

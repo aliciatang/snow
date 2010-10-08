@@ -76,11 +76,18 @@ class sfGuardUser extends PluginsfGuardUser
     switch($state)
     {
       case 'current':
+        $mq = Doctrine_Query::create()
+              ->select('MAX(date) as max')
+              ->from('Price p')
+              ->leftJoin('p.Security s')
+              ->where('s.market = ? OR s.market = ?',array('NYSE','NASDAQ'))
+              ->fetchArray();
         $q->leftJoin('s.Price p')
-          ->addSelect('p.cprice as cprice, p.date')
+          ->addSelect('p.cprice as cprice')
           ->addSelect('p.cprice*SUM(as.quantity) as mkt_value')
           ->addSelect('p.cprice*SUM(as.quantity)+SUM(as.sell_amount + as.buy_amount) as gain')
-          ->having('quantity <> ? AND p.date = MAX(p.date)', array('0') )
+          ->having('quantity <> ?',0)
+          ->andWhere('p.date = ?', $mq[0]["max"])
           ;
         break;
       case 'history':
@@ -91,7 +98,39 @@ class sfGuardUser extends PluginsfGuardUser
       default:
         break;
     }
+    //var_dump($q->getSqlQuery());
     $ret = $q->fetchArray();
+    $total = array();
+    $total['symbol'] = 'Total';
+    $total['quantity'] = 0;
+    $total['mkt_value'] = 0;
+    $total['gain'] = 0;
+    $total['dividend'] = 0;
+    $total['amount'] = 0;
+    $total['buy_quantity'] = 0;
+    $total['sell_quantity'] = 0;
+    $total['buy_amount'] = 0;
+    $total['sell_amount'] = 0;
+    foreach($ret as $s)
+    {
+      $total['quantity']      += $s['quantity'];
+      $total['gain']          += $s['gain'];
+      $total['dividend']      += $s['dividend'];
+      $total['amount']        += $s['amount'];
+      $total['buy_quantity']  += $s['buy_quantity'];
+      $total['buy_amount']    += $s['buy_amount'];
+      $total['sell_quantity'] += $s['sell_quantity'];
+      $total['sell_amount']   += $s['sell_amount'];
+      switch($state)
+      {
+        case 'current':
+          $total['mkt_value'] += $s['mkt_value'];
+          $total['cprice'] = $total['mkt_value']/$total['quantity'];
+          break;
+        case 'history':break;
+      }
+    }
+    $ret[]=$total;
     return $ret;
   }
 }
