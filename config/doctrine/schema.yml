@@ -427,19 +427,19 @@ Performance:
        scale: 4
        default: '0.00'
        notnull: true
-     total_market_value:
+     total_market_value:#security+cash
        type: decimal(16)
        scale: 4
        default: '0.00'
        notnull: true
-     time_weighted_return:
+     gain:#total value - total deposit
        type: decimal(16)
        scale: 4
        default: '0.00'
        notnull: true
-     gain:
-       type: decimal(16)
-       scale: 4
+     time_weighted_return:#1.*
+       type: decimal(8)
+       scale: 7
        default: '0.00'
        notnull: true
 

@@ -30,12 +30,41 @@
 	padding:5px;
 	margin:5px 5px;
 }
+ul#topNav
+{
+	-moz-border-radius: 5px;
+	background:url("/images/tab_background.gif") repeat-x scroll 0 0 transparent;
+	border:1px solid #DDDDDD;
+	padding:6px 10px;
+	margin:13px 0 0;
+}
+#topNav li
+{
+	display: inline;
+	list-style-type: none;
+}
+#topNav li a
+{
+	-moz-border-radius:4px;
+	color:#666666;
+	text-shadow:1px 1px 0 rgba(255, 255, 255, 0.7);
+	height:24px;
+	padding:4px 8px;
+}
+#topNav li a:hover
+{
+	background:#CCC;
+}
 #footer
 {
 	color:#666;
 	font-family:helvetica,arial,freesans,clean,sans-serif;
 	font-size:12px;
 	text-align:center;
+}
+a
+{
+	text-decoration: none;
 }
 h1
 {

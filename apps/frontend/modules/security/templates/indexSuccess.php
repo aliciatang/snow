@@ -1,3 +1,4 @@
+<h1>Current holdings</h1>
 <table>
   <thead>
     <th>Symbol</th>
@@ -23,6 +24,7 @@
 <?php endforeach;?>
   </tbody>
 </table>
+<h1>Historical Holdings</h1>
 <table>
   <thead>
     <th>Symbol</th>
