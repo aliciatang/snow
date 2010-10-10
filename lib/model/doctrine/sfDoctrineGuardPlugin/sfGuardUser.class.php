@@ -61,102 +61,40 @@ class sfGuardUser extends PluginsfGuardUser
   }
   public function getSecurities( $state='current')
   {
-    
-    $q = Doctrine_Query::create()
-        ->select('s.symbol as symbol, as.security_id')
-        ->addSelect('SUM(as.quantity) as quantity')
-        ->addSelect('SUM(as.buy_quantity) as buy_quantity')        
-        ->addSelect('SUM(as.sell_quantity)*(-1) as sell_quantity')
-        ->addSelect('SUM(as.buy_amount)*(-1) as buy_amount')
-        ->addSelect('SUM(as.sell_amount) as sell_amount')
-        ->addSelect('SUM(as.amount) as amount')
-        ->addSelect('SUM(as.dividend) as dividend')
-        ->from('AccountSecurity as')
-        ->leftJoin('as.Security s')
-        ->leftJoin('as.Account a')
-        ->where('a.user_id = ? AND s.id > ?', array($this->getId(),1))
-        ->groupBy('s.id')
-        ->orderBy('gain DESC') 
-        ;
     switch($state)
     {
       case 'current':
-        $mq = Doctrine_Query::create()
-              ->select('MAX(date) as max')
-              ->from('Price p')
-              ->leftJoin('p.Security s')
-              ->where('s.market = ? OR s.market = ?',array('NYSE','NASDAQ'))
-              ->fetchArray();
-        $q->leftJoin('s.Price p')
-          ->addSelect('p.cprice as cprice')
-          ->addSelect('p.cprice*SUM(as.quantity) as mkt_value')
-          ->addSelect('p.cprice*SUM(as.quantity)+SUM(as.sell_amount + as.buy_amount) as gain')
-          ->having('quantity > ?',0)
-          ->andWhere('p.date = ?', $mq[0]["max"])
-          ;
+        $ret = Doctrine_Manager::getInstance()
+              ->getCurrentConnection()
+              ->fetchAll('SELECT s.`symbol`,SUM(sa.`quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) as `buy_price`,p.`cprice` as `sell_price`, (p.`cprice`/SUM(sa.`buy_amount`)*SUM(sa.`buy_quantity`)*(-1)-1)*100 as gain,SUM(sa.`quantity`)*p.`cprice` as mkt_value, SUM(sa.`dividend`) AS dividend, SUM(sa.`quantity`)*p.`cprice`+SUM(sa.`dividend`)-SUM(sa.`buy_amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a, `price` p) ON s.id = sa.`security_id` && a.id=sa.`account_id` && p.`security_id`=s.id  WHERE sa.`quantity` >0 && sa.`security_id` > 1 && p.`date` = (select MAX(p2.`date`) FROM `price` p2 WHERE p2.`security_id`=p.`security_id`) GROUP BY sa.`security_id`');
         break;
       case 'history':
-        $q->having('quantity = ?', 0 )
-          ->addSelect('SUM(as.sell_amount + as.buy_amount) as gain')
-          ;
+        $ret = Doctrine_Manager::getInstance()
+              ->getCurrentConnection()
+              ->fetchAll('SELECT s.`symbol`,SUM(sa.`buy_quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) AS `buy_price`, IF(SUM(sa.`sell_quantity`) < 0,SUM(sa.`sell_amount`)/SUM(sa.`sell_quantity`),0)*(-1) AS `sell_price`, (SUM(sa.`sell_amount`)/SUM(sa.`buy_amount`)*(-1)-1)*100 AS gain,SUM(sa.`sell_amount`) as mkt_value,SUM(sa.`dividend`) AS dividend, SUM(sa.`amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a ) ON s.id = sa.`security_id` && a.id=sa.`account_id` WHERE sa.`quantity` =0 && sa.`security_id` > 1 GROUP BY sa.`security_id`');
         break;
       default:
         break;
     }
-    var_dump($q->getSqlQuery());
-    $ret = $q->fetchArray();
-    $cash = Doctrine_Query::create()
-            ->addSelect('SUM(as.amount) as amount')
-            ->addSelect('SUM(as.dividend) as dividend')
-            ->addSelect('SUM(as.buy_quantity) as sell_quantity')
-            ->addSelect('SUM(as.sell_quantity) as buy_quantity')
-            ->addSelect('SUM(as.sell_amount) as sell_amount')
-            ->addSelect('SUM(as.buy_amount) as buy_amount')
-            ->from('Account a')
-            ->leftJoin('a.AccountSecurities as')
-            ->leftJoin('as.Security s')
-            ->where('a.user_id = ?', array($this->getId()))
-            ->andWhere('as.security_id = ?', '1')
-            ->fetchArray();
-    $cash=$cash[0];
-    $cash['symbol'] = 'Cash';
-    $cash['quantity']=$cash['amount'];
-    $cash['mkt_value']=$cash['amount'];
-    $cash['gain']=0;
-    $cash['cprice'] = 1;
-    $ret[]=$cash;
-    
     $total = array();
-    $total['symbol'] = 'Total';
-    $total['quantity'] = 0;
-    $total['mkt_value'] = 0;
-    $total['gain'] = 0;
-    $total['dividend'] = 0;
-    $total['amount'] = 0;
-    $total['buy_quantity'] = 0;
-    $total['sell_quantity'] = 0;
-    $total['buy_amount'] = 0;
-    $total['sell_amount'] = 0;
+    $total['symbol']      = 'Total';
+    $total['quantity']    = 0;
+    $total['mkt_value']   = 0;
+    $total['gain']        = 0;
+    $total['dividend']    = 0;
+    $total['buy_price']   = 0;
+    $total['total_gain']  = 0 ;
     foreach($ret as $s)
     {
-      $total['quantity']      += $s['quantity'];
-      $total['gain']          += $s['gain'];
-      $total['dividend']      += $s['dividend'];
-      $total['amount']        += $s['amount'];
-      $total['buy_quantity']  += $s['buy_quantity'];
-      $total['buy_amount']    += $s['buy_amount'];
-      $total['sell_quantity'] += $s['sell_quantity'];
-      $total['sell_amount']   += $s['sell_amount'];
-      switch($state)
-      {
-        case 'current':
-          $total['mkt_value'] += $s['mkt_value'];
-          $total['cprice'] = $total['mkt_value']/$total['quantity'];
-          break;
-        case 'history':break;
-      }
+      $total['quantity']  += $s['quantity'];
+      $total['mkt_value'] += isset($s['mkt_value'])?$s['mkt_value']:0;
+      $total['gain']      += $s['gain'];
+      $total['dividend']  += $s['dividend'];
+      $total['buy_price'] += $s['quantity']*$s['buy_price'];
+      $total['total_gain']+= $s['total_gain'];
     }
-    
+    $total['sell_price'] = $total['mkt_value']/$total['quantity'];
+    $total['buy_price'] = $total['buy_price']/$total['quantity'];
     $ret[]=$total;
     return $ret;
   }

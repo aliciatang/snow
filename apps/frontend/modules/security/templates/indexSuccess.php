@@ -8,6 +8,7 @@
     <th>Market Value</th>
     <th>Gain</th>
     <th>Dividend</th>
+    <th>Total Gain</th>
   </thead>
   <tbody>
 <?php foreach($csecurities as $key =>$s):?>
@@ -15,11 +16,12 @@
       <td><?php echo $s['symbol']?></td>
       <td class="shares"><?php echo $s['quantity']?>
       </td>
-      <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
-      <td><?php echo number_format($s['cprice'],2)?></td>
+      <td><?php echo number_format($s['buy_price'],2)?></td>
+      <td><?php echo number_format($s['sell_price'],2)?></td>
       <td><?php echo number_format($s['mkt_value'],2)?></td>
-      <td><?php echo number_format($s['gain'],2)?></td>
+      <td class="<?php echo ($s['gain']>0)?'positive':'negtive' ?>"><?php echo number_format($s['gain'],2)?>%</td>
       <td><?php echo number_format($s['dividend'],2)?></td>
+      <td><?php echo number_format($s['total_gain'],2)?></td>
     </tr>
 <?php endforeach;?>
   </tbody>
@@ -39,12 +41,12 @@
 <?php foreach($hsecurities as $s):?>
     <tr>
       <td><?php echo $s['symbol']?></td>
-      <td><?php echo $s['buy_quantity']?></td>
-      <td><?php echo $s['buy_quantity']?number_format($s['buy_amount']/$s['buy_quantity'],2):'--'?></td>
-      <td><?php echo $s['sell_quantity']?number_format($s['sell_amount']/$s['sell_quantity'],2):'--'?></td>
-      <td><?php echo number_format($s['gain'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['gain']*100/$s['buy_amount']):0,2) ?>%)</td>
-      <td><?php echo number_format($s['dividend'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['dividend']*100/$s['buy_amount']):0,2) ?>%)</td>
-      <td><?php echo number_format($s['amount'],2)?>(<?php echo number_format(floatval($s['buy_amount'])?($s['amount']*100/$s['buy_amount']):0,2) ?>%)</td>
+      <td><?php echo $s['quantity']?></td>
+      <td><?php echo number_format($s['buy_price'],2)?></td>
+      <td><?php echo number_format($s['sell_price'],2)?></td>
+      <td class="<?php echo ($s['gain']>0)?'positive':'negtive' ?>"><?php echo number_format($s['gain'],2)?>%</td>
+      <td><?php echo number_format($s['dividend'],2)?></td>
+      <td><?php echo number_format($s['total_gain'],2)?></td>
     </tr>
 <?php endforeach;?>
   </tbody>

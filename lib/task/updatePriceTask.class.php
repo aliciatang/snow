@@ -49,6 +49,9 @@ EOF;
     {
       $users = array($user);
     }
-    SecurityTable::loadPrice();
+    $list = Doctrine_Manager::getInstance()
+            ->getCurrentConnection()
+            ->fetchColumn('SELECT DISTINCT s.`yahoo_id` FROM `account_security` sa LEFT JOIN (`security` s) on s.`id` = sa.`security_id`  WHERE sa.`quantity` >0 AND s.`id`>1',array(1),0);
+    Yahoo::loadPrices($list);
   }
 }

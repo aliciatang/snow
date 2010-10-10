@@ -73,31 +73,38 @@ h1
 	font-size:24px;
 	font-weight:bolder;
 }
+.positive
+{
+	color:green;
+}
+.negtive
+{
+	color:red;
+}
 table
 {
-	background-image:url("/images/bgfadegreen.gif");
+	background:url("/images/bg_gradient.gif") repeat-x scroll 0 100% #EAF2F5;
   border-collapse:collapse;
-	background-color:#E5EECC;
-	background-repeat:repeat-x;
-	border:1px solid #d4d4d4;
+	border:1px solid #BEDCE7;
 }
-table.expandContainer th,table.expandContainer td
+td, th
 {
-	border-bottom:1px solid #d4d4d4;
-}
-tr, td, th
-{
-	text-align:center;
+	text-align:right;
 	background-color:transparent;
+	border-bottom:1px solid #4183C4;
 }
 tr:hover
 {
-	background-color:orange;
+	background-color:#61A3F4;
 }
 tbody td
 {
   border-bottom:1px solid #EEE;
   padding:2px 5px;
+}
+table.expandContainer th,table.expandContainer td
+{
+	border-bottom:1px solid #d4d4d4;
 }
 tr.expandable
 {

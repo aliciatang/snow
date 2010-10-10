@@ -24,7 +24,7 @@ class Yahoo
     $symbols='';
     foreach($list as $security)
     {
-      $symbols.=$security['yahoo_id'].',';
+      $symbols.=$security.',';
     }
     $url = self::$stockUrl.self::$tabs['daywatch'].$symbols;
     if (sfConfig::get('sf_logging_enabled'))
