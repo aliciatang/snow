@@ -7,9 +7,9 @@
       <tr>
         <th>Symbol</th>
         <th>Shares</th>
-        <th>Avg. Buy</th>
-        <th>Avg. Sell</th>
-        <th>Dividend</th>
+        <th>Buy</th>
+        <th>Price</th>
+        <th>Market Value</th>
       </tr>
     </thead>
     <tbody>
@@ -18,8 +18,8 @@
         <td><?php echo $sec['Security']['symbol']?></td>
         <td><?php echo $sec['quantity']?></td>
         <td><?php echo number_format($sec['avg_buy_price'],2)?></td>
-        <td><?php echo number_format($sec['avg_sell_price'],2)?></td>
-        <td><?php echo number_format($sec['other_amount'],2)?></td>
+        <td><?php echo number_format($sec['cprice'],2)?></td>
+        <td><?php echo number_format($sec['market_value'],2)?></td>
       </tr>
       <?php endforeach;?>
     </tbody>

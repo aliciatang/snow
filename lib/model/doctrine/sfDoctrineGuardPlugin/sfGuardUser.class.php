@@ -31,12 +31,16 @@ class sfGuardUser extends PluginsfGuardUser
         ;
     return $q->execute();
   }
-  public function getAccountsWithAccountSecurities()
+  public function getAccountsWithCurrentHoldings()
   {
     $q = Doctrine_Query::create()
-        ->from('Account a')
-        ->leftJoin('a.AccountSecurities s')
-        ->leftJoin('s.Security ss')
+        ->select('a.number,a.type')
+        ->addSelect('sum(t.quantity) as shares')
+        ->addSelect('sum(t.amount)')
+        ->from('Transaction t')
+        ->leftJoin('t.Account a')
+        ->leftJoin('t.Security s')
+        ->leftJoin('s.Price p')
         ->where('a.user_id = ?', $this->getId())
         ->orderBy('a.id,s.quantity')
         ;
@@ -47,27 +51,28 @@ class sfGuardUser extends PluginsfGuardUser
       $ret[$i]['number'] = "****".substr($a['number'],-4);
       foreach($a['AccountSecurities'] as $j=>$s)
       {
-        $ret[$i]['amount'] += $s['buy_amount']+$s['sell_amount']+$s['other_amount'];
+        $ret[$i]['amount'] += $s['amount'];
         $ret[$i]['AccountSecurities'][$j]['avg_buy_price']=(!$s['buy_quantity'])?0:(floatval($s['buy_amount'])/intval($s['buy_quantity']));
         $ret[$i]['AccountSecurities'][$j]['avg_sell_price']=(!$s['sell_quantity'])?0:(floatval($s['sell_amount'])/intval($s['sell_quantity']));
-        if($s['security_id'] == '1')$ret[$i]['deposit'] = $s['other_amount'];
+        if($s['security_id'] == '1')$ret[$i]['deposit'] = $s['sell_amount'];
       }
     }
     return $ret;
   }
   public function getSecurities( $state='current')
   {
+    
     $q = Doctrine_Query::create()
-        ->select('s.symbol')
+        ->select('s.symbol as symbol, as.security_id')
         ->addSelect('SUM(as.quantity) as quantity')
         ->addSelect('SUM(as.buy_quantity) as buy_quantity')        
         ->addSelect('SUM(as.sell_quantity)*(-1) as sell_quantity')
         ->addSelect('SUM(as.buy_amount)*(-1) as buy_amount')
         ->addSelect('SUM(as.sell_amount) as sell_amount')
-        ->addSelect('SUM(as.sell_amount + as.buy_amount + as.other_amount) as amount')
-        ->addSelect('SUM(as.other_amount) as dividend')
-        ->from('Security s')
-        ->leftJoin('s.AccountSecurities as')
+        ->addSelect('SUM(as.amount) as amount')
+        ->addSelect('SUM(as.dividend) as dividend')
+        ->from('AccountSecurity as')
+        ->leftJoin('as.Security s')
         ->leftJoin('as.Account a')
         ->where('a.user_id = ? AND s.id > ?', array($this->getId(),1))
         ->groupBy('s.id')
@@ -86,7 +91,7 @@ class sfGuardUser extends PluginsfGuardUser
           ->addSelect('p.cprice as cprice')
           ->addSelect('p.cprice*SUM(as.quantity) as mkt_value')
           ->addSelect('p.cprice*SUM(as.quantity)+SUM(as.sell_amount + as.buy_amount) as gain')
-          ->having('quantity <> ?',0)
+          ->having('quantity > ?',0)
           ->andWhere('p.date = ?', $mq[0]["max"])
           ;
         break;
@@ -98,25 +103,26 @@ class sfGuardUser extends PluginsfGuardUser
       default:
         break;
     }
-    //var_dump($q->getSqlQuery());
+    var_dump($q->getSqlQuery());
     $ret = $q->fetchArray();
     $cash = Doctrine_Query::create()
-            ->addSelect('SUM(as.sell_amount + as.buy_amount + as.other_amount) as amount')
+            ->addSelect('SUM(as.amount) as amount')
+            ->addSelect('SUM(as.dividend) as dividend')
+            ->addSelect('SUM(as.buy_quantity) as sell_quantity')
+            ->addSelect('SUM(as.sell_quantity) as buy_quantity')
+            ->addSelect('SUM(as.sell_amount) as sell_amount')
+            ->addSelect('SUM(as.buy_amount) as buy_amount')
             ->from('Account a')
             ->leftJoin('a.AccountSecurities as')
             ->leftJoin('as.Security s')
             ->where('a.user_id = ?', array($this->getId()))
+            ->andWhere('as.security_id = ?', '1')
             ->fetchArray();
     $cash=$cash[0];
     $cash['symbol'] = 'Cash';
     $cash['quantity']=$cash['amount'];
     $cash['mkt_value']=$cash['amount'];
     $cash['gain']=0;
-    $cash['dividend']=0;
-    $cash['buy_quantity'] = 1;
-    $cash['sell_quantity'] = 1;
-    $cash['buy_amount'] = 0;
-    $cash['sell_amount'] = 0;
     $cash['cprice'] = 1;
     $ret[]=$cash;
     

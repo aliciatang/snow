@@ -205,7 +205,10 @@ AccountSecurity:
     sell_amount:
       type: decimal(16)
       scale: 4
-    other_amount:
+    amount:
+      type: decimal(16)
+      scale: 4
+    dividend:
       type: decimal(16)
       scale: 4
   relations:
@@ -427,17 +430,17 @@ Performance:
        scale: 4
        default: '0.00'
        notnull: true
-     total_market_value:#security+cash
+     total_market_value: #security+cash
        type: decimal(16)
        scale: 4
        default: '0.00'
        notnull: true
-     gain:#total value - total deposit
+     gain: #total value - total deposit
        type: decimal(16)
        scale: 4
        default: '0.00'
        notnull: true
-     time_weighted_return:#1.*
+     time_weighted_return: #1.*
        type: decimal(8)
        scale: 7
        default: '0.00'
