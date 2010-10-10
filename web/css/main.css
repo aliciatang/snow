@@ -18,7 +18,7 @@
 {
 	font-family:Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
 	font-size:28px;
-	color:#617f10;
+	color:#009DD4;
 	font-weight:bold;
 }
 #greeting span
@@ -68,14 +68,13 @@ a
 }
 h1
 {
-	color:#92b901;
 	font-family:arial;
 	font-size:24px;
 	font-weight:bolder;
 }
 .positive
 {
-	color:green;
+	color:#00AA00;
 }
 .negtive
 {
@@ -83,24 +82,47 @@ h1
 }
 table
 {
-	background:url("/images/bg_gradient.gif") repeat-x scroll 0 100% #EAF2F5;
   border-collapse:collapse;
-	border:1px solid #BEDCE7;
 }
-td, th
+td
 {
 	text-align:right;
 	background-color:transparent;
-	border-bottom:1px solid #4183C4;
+	border-bottom:1px solid #BEDCE7;
+	padding:4px 8px;
+}
+thead
+{
+	border-top:2px solid #BEDCE7;
+	border-bottom:1px solid #BEDCE7;
+}
+thead th
+{
+	padding:5px 10px;
+	text-align:right;
+	background-color:#D7F0F8;
+	color:#08495E;
+	font-weight:bolder;
+}
+tfoot
+{
+	background-color:#DFF8F8;
+	border-bottom:2px solid #BEDCE7;
+	
+}
+td:first-child, th:first-child
+{
+	text-align:center;
+	font-weight:bolder;
+}
+tr
+{
+	border-bottom:1px solid #BEDCE7;
 }
 tr:hover
 {
 	background-color:#61A3F4;
-}
-tbody td
-{
-  border-bottom:1px solid #EEE;
-  padding:2px 5px;
+	border-bottom:1px solid #FFF;
 }
 table.expandContainer th,table.expandContainer td
 {
@@ -119,12 +141,6 @@ tr.expandable:nth-child(even)
 }
 tr.expandable:nth-child(odd) {
 	background: #FFF
-}
-thead th
-{
-  background-color:transparent;
-  color:#617F10;
-	padding:5px 10px;
 }
 
 table.expandTable
