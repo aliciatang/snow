@@ -122,7 +122,7 @@ Price:
     low:
       type: decimal(16)
       scale: 4
-    volumn:
+    volume:
       type: integer
   actAs:
     Timestampable:
@@ -134,8 +134,7 @@ Price:
   indexes:
     sdate:
       fields: [security_id, date]
-      unique: true
-      primary: true
+      type: unique
 Security:
   connection: doctrine
   tableName: security

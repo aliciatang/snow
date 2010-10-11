@@ -38,22 +38,48 @@ EOF;
     
     // add your code here
     $this->logSection('history', $options['symbol'].": ".$options['start']."~".$options['end']);
-    $url = Yahoo::$historyUrl."&s=".$symbol;
-    $min = min($options['start'],$options['end']);
-    $max = max($options['start'],$options['end']);
-    $url .= "&a=".date('j',strtotime($min));
-    $url .= "&b=".date('d',strtotime($min));
-    $url .= "&c=".date('Y',strtotime($min));
+    $url = Yahoo::$historyUrl."s=".$options['symbol'];
+    $min = min(strtotime($options['start']),strtotime($options['end']));
+    $max = max(strtotime($options['start']),strtotime($options['end']));
+    $url .= "&a=".(date('m',$min)-1);
+    $url .= "&b=".date('d',$min);
+    $url .= "&c=".date('Y',$min);
     
-    $url .= "&d=".date('j',strtotime($max));
-    $url .= "&e=".date('d',strtotime($max));
-    $url .= "&f=".date('Y',strtotime($max));
+    $url .= "&d=".(date('m',$max)-1);
+    $url .= "&e=".date('d',$max);
+    $url .= "&f=".date('Y',$max);
     $url .= '&g=d';
     $url .= '&ignore=.csv';
     echo $url."\n";
-    ini_set('user_agent', 'PHP/4.3.3');
-    $file = fopen($url,'r');
     $reader = new sfCsvReader($url);
-    
+    $reader->setSelectColumns(array(
+      'Date','Open','High','Low','Close','Volume'
+      ));
+    $reader->open();
+    $count=0;
+    $security = SecurityTable::findOneByScottradeId($options['symbol']);
+    while ($data = $reader->read())
+    {
+      $count++;
+      $price = Doctrine_Query::create()
+          ->from('Price p')
+          ->where('security_id = ? AND date=?',array($security->id,$data['Date']))
+          ->fetchOne();
+      if(!$price)
+      {
+        $price = new Price();
+        $price->setSecurity($security);
+        $price->setDate($data['Date']);
+        $security->Price[] = $price;
+      }
+      $price->low=$data['Low'];
+      $price->open=$data['Open'];
+      $price->high=$data['High'];
+      $price->close=$data['Close'];
+      $price->volume=$data['Volume'];
+    }
+    $reader->close();
+    $security->getPrice()->save();
+    echo $count;
   }
 }
