@@ -12,53 +12,47 @@
  */
 class sfGuardUser extends PluginsfGuardUser
 {
-  public function getAccountsWithTransactions()
+  /**
+   * get Accounts of the user which have records 
+   * and compute the market value and gains for the latest date on record.
+   * @return Array an array with key as account_id (or Total), 
+   * and contains columns for 
+   *         number: **** dd 
+   *         account_type:
+   *         mkt_value:
+   *         balance:
+   *         deposit:    
+   */
+  public function getAccounts()
   {
-    $q = Doctrine_Query::create()
-        ->from('Account a')
-        ->leftJoin('a.Transactions t')
-        ->orderBy('t.security_id,t.trade_date')
-        ->where('a.user_id = ?', $this->getId())
-        ;
-    return $q->execute();
-  }
-  public function getAccountsWithSecurities()
-  {
-    $q = Doctrine_Query::create()
-        ->from('Account a')
-        ->leftJoin('a.Securities s')
-        ->where('a.user_id = ?', $this->getId())
-        ;
-    return $q->execute();
-  }
-  public function getAccountsWithCurrentHoldings()
-  {
-    $q = Doctrine_Query::create()
-        ->select('a.number,a.type')
-        ->addSelect('sum(t.quantity) as shares')
-        ->addSelect('sum(t.amount)')
-        ->from('Transaction t')
-        ->leftJoin('t.Account a')
-        ->leftJoin('t.Security s')
-        ->leftJoin('s.Price p')
-        ->where('a.user_id = ?', $this->getId())
-        ->orderBy('a.id,s.quantity')
-        ;
-    $ret = $q->fetchArray();
-    foreach($ret as $i=>$a)
+    $ret = Doctrine_Manager::getInstance()
+          ->getCurrentConnection()
+          ->fetchAll('SELECT m.`id`,`number`,`type`,`mkt_value`,`balance`,`deposit`,((mkt_value+balance)/deposit-1)*100 as `gain` 
+                      FROM (SELECT a.`id`,a.`number`,a.`type`,SUM(sa.`quantity`*p.`cprice`) as `mkt_value` FROM `account_security` sa LEFT JOIN (`account` a, `price` p) on (a.`id`=sa.`account_id` && p.`security_id`=sa.`security_id`) WHERE sa.`security_id`>1 && a.user_id='.$this->getId().' && p.`date`=(select max(p2.`date`) FROM `price` p2 WHERE p.`security_id`=p2.`security_id`)  GROUP BY a.`id`) m 
+                      LEFT JOIN (SELECT a.`id`,SUM(sa.`amount`) AS `balance`,SUM(sa.`sell_amount`) AS `deposit` FROM `account_security` sa LEFT JOIN `account` a on a.`id`=sa.`account_id` WHERE sa.`security_id`=1 && a.user_id='.$this->getId().' GROUP BY a.`id`) b 
+                      ON b.`id`=m.`id`');
+    $total = array();
+    $total['number']    = 'Total';
+    $total['type']      = 'ALL';
+    $total['mkt_value'] = 0;
+    $total['balance']   = 0;
+    $total['deposit']   = 0;
+    $accounts = array();
+    foreach($ret as $key=>$a)
     {
-      $ret[$i]['amount'] = 0;
-      $ret[$i]['number'] = "****".substr($a['number'],-4);
-      foreach($a['AccountSecurities'] as $j=>$s)
-      {
-        $ret[$i]['amount'] += $s['amount'];
-        $ret[$i]['AccountSecurities'][$j]['avg_buy_price']=(!$s['buy_quantity'])?0:(floatval($s['buy_amount'])/intval($s['buy_quantity']));
-        $ret[$i]['AccountSecurities'][$j]['avg_sell_price']=(!$s['sell_quantity'])?0:(floatval($s['sell_amount'])/intval($s['sell_quantity']));
-        if($s['security_id'] == '1')$ret[$i]['deposit'] = $s['sell_amount'];
-      }
+      $a['number'] ='**** '.substr($a['number'],-2);
+      $total['mkt_value'] += $a['mkt_value'];
+      $total['deposit']   += $a['deposit'];
+      $total['balance']   += $a['balance'];
+      $accounts[$a['id']] = $a;
     }
-    return $ret;
+    $total['gain'] = (($total['mkt_value']+$total['balance'])/$total['deposit']-1)*100;
+    $accounts['total']=$total;
+    return $accounts;
   }
+  /**
+   *
+   */
   public function getSecurities( $state='current')
   {
     switch($state)
@@ -66,12 +60,12 @@ class sfGuardUser extends PluginsfGuardUser
       case 'current':
         $ret = Doctrine_Manager::getInstance()
               ->getCurrentConnection()
-              ->fetchAll('SELECT s.`symbol`,SUM(sa.`quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) as `buy_price`,p.`cprice` as `sell_price`, (p.`cprice`/SUM(sa.`buy_amount`)*SUM(sa.`buy_quantity`)*(-1)-1)*100 as gain,SUM(sa.`quantity`)*p.`cprice` as mkt_value, SUM(sa.`dividend`) AS dividend, SUM(sa.`quantity`)*p.`cprice`+SUM(sa.`dividend`)-SUM(sa.`buy_amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a, `price` p) ON s.id = sa.`security_id` && a.id=sa.`account_id` && p.`security_id`=s.id  WHERE sa.`quantity` >0 && sa.`security_id` > 1 && p.`date` = (select MAX(p2.`date`) FROM `price` p2 WHERE p2.`security_id`=p.`security_id`) GROUP BY sa.`security_id`');
+              ->fetchAll('SELECT s.`symbol`,SUM(sa.`quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) as `buy_price`,p.`cprice` as `sell_price`, (p.`cprice`/SUM(sa.`buy_amount`)*SUM(sa.`buy_quantity`)*(-1)-1)*100 as gain,SUM(sa.`quantity`)*p.`cprice` as mkt_value, SUM(sa.`dividend`) AS dividend, SUM(sa.`quantity`)*p.`cprice`+SUM(sa.`dividend`)-SUM(sa.`buy_amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a, `price` p) ON s.id = sa.`security_id` && a.id=sa.`account_id` && p.`security_id`=s.id  WHERE sa.`quantity` >0 && sa.`security_id` > 1 && p.`date` = (select MAX(p2.`date`) FROM `price` p2 WHERE p2.`security_id`=p.`security_id`) && a.user_id='.$this->getId().' GROUP BY sa.`security_id`');
         break;
       case 'history':
         $ret = Doctrine_Manager::getInstance()
               ->getCurrentConnection()
-              ->fetchAll('SELECT s.`symbol`,SUM(sa.`buy_quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) AS `buy_price`, IF(SUM(sa.`sell_quantity`) < 0,SUM(sa.`sell_amount`)/SUM(sa.`sell_quantity`),0)*(-1) AS `sell_price`, (SUM(sa.`sell_amount`)/SUM(sa.`buy_amount`)*(-1)-1)*100 AS gain,SUM(sa.`sell_amount`) as mkt_value,SUM(sa.`dividend`) AS dividend, SUM(sa.`amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a ) ON s.id = sa.`security_id` && a.id=sa.`account_id` WHERE sa.`quantity` =0 && sa.`security_id` > 1 GROUP BY sa.`security_id`');
+              ->fetchAll('SELECT s.`symbol`,SUM(sa.`buy_quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) AS `buy_price`, IF(SUM(sa.`sell_quantity`) < 0,SUM(sa.`sell_amount`)/SUM(sa.`sell_quantity`),0)*(-1) AS `sell_price`, (SUM(sa.`sell_amount`)/SUM(sa.`buy_amount`)*(-1)-1)*100 AS gain,SUM(sa.`sell_amount`) as mkt_value,SUM(sa.`dividend`) AS dividend, SUM(sa.`amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a ) ON s.id = sa.`security_id` && a.id=sa.`account_id` WHERE sa.`quantity` =0 && sa.`security_id` > 1 && a.`user_id`='.$this->getId().' GROUP BY sa.`security_id`');
         break;
       default:
         break;

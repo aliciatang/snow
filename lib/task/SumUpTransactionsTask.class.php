@@ -40,9 +40,15 @@ EOF;
     Doctrine_Manager::getInstance()
             ->getCurrentConnection()
             ->execute('INSERT INTO `account_security`(`account_id`, `security_id`,`quantity`,`buy_quantity`,`sell_quantity`,`sell_amount`,`buy_amount`,`amount`,`dividend`) 
-            SELECT t.`account_id`, t.`security_id`,SUM(t.`quantity`) as `quantity`,SUM(if(t.`quantity`>0,t.`quantity`,if(t.`security_id`=1 && t.`amount`>0 && t.`action_id` NOT IN (2,4,7),t.`amount`,0))) as `buy_quantity`,SUM(if(t.`quantity`<0 ,t.`quantity`,if(t.`security_id`=1 && t.`amount`<0 && t.`action_id` NOT IN (2,4,7),t.`amount`,0))) as `sell_quantity`, SUM(if(t.`amount`>0 && t.`action_id` NOT IN (2,4,7),t.`amount`,0)) as `sell_amount`, sum(if(t.`amount`<0 && t.`action_id` NOT IN (2,4,7),t.`amount`,0)) as `buy_amount`, SUM(t.`amount`) as `amount`, sum(if(action_id IN (2,4,7),t.amount,0)) as `dividend` 
+            SELECT t.`account_id`, t.`security_id`,
+              SUM(t.`quantity`) as `quantity`,
+              SUM(if(t.`quantity`>0,t.`quantity`,if(t.`security_id`=1 && t.`amount`>0 && t.`action_id` NOT IN (2,4,7),t.`amount`,0))) as `buy_quantity`,
+              SUM(if(t.`quantity`<0 ,t.`quantity`,if(t.`security_id`=1 && t.`amount`<0 && t.`action_id` NOT IN (2,4,7),t.`amount`,0))) as `sell_quantity`, 
+              SUM(if(t.`amount`>0 && t.`action_id` NOT IN (116,2,4,7),t.`amount`,0)) as `sell_amount`, 
+              SUM(if(t.`amount`<0 && t.`action_id` NOT IN (116,2,4,7),t.`amount`,0)) as `buy_amount`, 
+              SUM(t.`amount`) as `amount`, sum(if(action_id IN (116,2,4,7),t.amount,0)) as `dividend` 
             FROM `transaction` t  
-            WHERE t.`action_id` NOT IN (16,17,18) 
+            WHERE t.`action_id` NOT IN (17,18) 
             GROUP BY t.`security_id`,t.`account_id` 
             ON DUPLICATE KEY UPDATE `quantity`=VALUES(`quantity`),`buy_quantity`=VALUES(`buy_quantity`),`sell_quantity`=VALUES(`sell_quantity`),`sell_amount`=VALUES(`sell_amount`),`buy_amount`=VALUES(`buy_amount`),`amount`=VALUES(`amount`),`dividend`=VALUES(`dividend`)');
     Doctrine_Manager::getInstance()

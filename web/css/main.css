@@ -76,13 +76,14 @@ h1
 {
 	color:#00AA00;
 }
-.negtive
+.negative
 {
 	color:red;
 }
 table
 {
   border-collapse:collapse;
+	width:100%;
 }
 td
 {

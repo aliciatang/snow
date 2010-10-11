@@ -22,7 +22,7 @@
       <div id="content" class="grid_8 alpha">
 	<?php echo $sf_content ?>
       </div>
-      <div id="sidebar" class="grid_4 alpha">
+      <div id="sidebar" class="grid_4 omega">
       <?php include_slot('sidebar')?>
       </div>
     </div>

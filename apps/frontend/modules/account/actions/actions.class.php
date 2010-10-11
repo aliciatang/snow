@@ -10,6 +10,7 @@
  */
 class accountActions extends sfActions
 {
+
  /**
   * Executes index action
   *
@@ -18,7 +19,25 @@ class accountActions extends sfActions
   public function executeIndex(sfWebRequest $request)
   {
     //accounts ia an array not a doctrine_collection  
-    $this->accounts = $this->getUser()->getGuardUser()->getAccountsWithCurrentHoldings();
+    $this->accounts = $this->getUser()->getGuardUser()->getAccounts();
+    $this->getUser()->setAttribute('accounts',$this->accounts);
     //SecurityTable::loadPrice();
+  }
+  /**
+    * Executes show action
+    *
+    * @param sfRequest $request A request object
+    */
+  public function executeShow(sfWebRequest $request)
+  {
+    $id=$request->getParameter('id');
+    if(! $accounts = $this->getUser()->getAttribute('accounts'))
+    {
+      $accounts = $this->getUser()->getGuardUser()->getAccounts();
+    }
+    $this->account = $accounts[$id];
+    $this->csecurities = AccountTable::getHoldings($id,'current');
+    $this->hsecurities = AccountTable::getHoldings($id,'history');
+    
   }
 }
