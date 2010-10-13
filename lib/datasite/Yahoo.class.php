@@ -2,6 +2,7 @@
 class Yahoo
 {
   private static $stockUrl='http://finance.yahoo.com/';
+  private static $priceUrl= 'http://download.finance.yahoo.com/d/quotes.csv?s=COH&f=sl1d1t1c1ohgv&e=.csv'
   public static $historyUrl = 'http://ichart.finance.yahoo.com/table.csv?';
   private static $tabs=array(
     'summary'=>'q?d=s&s=',
@@ -100,6 +101,11 @@ class Yahoo
     echo $url;
     $content = file_get_contents($url);
     
+  }
+  public static function loadPricesFromCsv($list)
+  {
+    $url = implode(',',$list);
+    $url = str_replace('*',$url,self::stockUrl);
   }
 }
 ?>

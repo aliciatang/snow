@@ -35,12 +35,27 @@ EOF;
     // initialize the database connection
     $databaseManager = new sfDatabaseManager($this->configuration);
     $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
-    
-    // add your code here
-    $this->logSection('history', $options['symbol'].": ".$options['start']."~".$options['end']);
-    $url = Yahoo::$historyUrl."s=".$options['symbol'];
-    $min = min(strtotime($options['start']),strtotime($options['end']));
-    $max = max(strtotime($options['start']),strtotime($options['end']));
+    $ret = Doctrine_Manager::getInstance()
+          ->getCurrentConnection()
+          ->fetchAll('SELECT s.`yahoo_id` as `symbol`,max(t.`trade_date`) as `date1`, min(t.`trade_date`) as `date2` FROM `transaction` t LEFT JOIN `security` s ON s.id = t.security_id  WHERE `security_id` <> 1 && s.`market` <> "OPTION" GROUP BY `security_id`');
+    if(empty($ret))
+    {
+      $this->logSection(get_class($this),'No transactions in database, no need to update price.');
+    }
+    //var_dump($ret);die;
+    foreach($ret as $s)
+    {
+      $this->updateOne($s['symbol'],$s['date1'],$s['date2']);
+    }
+  }
+  private function updateOne($symbol,$date1,$date2)
+  {
+
+    $this->logSection(__function__,'updating ...'.$symbol.": ".$date1."~".$date2);
+    $url = Yahoo::$historyUrl."s=".$symbol;
+    $min = min(strtotime($date1),strtotime($date2));
+    $max = max(strtotime($date1),strtotime($date2));
+
     $url .= "&a=".(date('m',$min)-1);
     $url .= "&b=".date('d',$min);
     $url .= "&c=".date('Y',$min);
@@ -50,36 +65,41 @@ EOF;
     $url .= "&f=".date('Y',$max);
     $url .= '&g=d';
     $url .= '&ignore=.csv';
-    echo $url."\n";
-    $reader = new sfCsvReader($url);
-    $reader->setSelectColumns(array(
-      'Date','Open','High','Low','Close','Volume'
-      ));
-    $reader->open();
-    $count=0;
-    $security = SecurityTable::findOneByScottradeId($options['symbol']);
-    while ($data = $reader->read())
+    try
     {
-      $count++;
-      $price = Doctrine_Query::create()
-          ->from('Price p')
-          ->where('security_id = ? AND date=?',array($security->id,$data['Date']))
-          ->fetchOne();
-      if(!$price)
+      $reader = new sfCsvReader($url);
+      $reader->setSelectColumns(array(
+        'Date','Open','High','Low','Close','Volume'
+        ));
+      $reader->open();
+      $count=0;
+      $security = SecurityTable::findOneByScottradeId($symbol);
+      while ($data = $reader->read())
       {
-        $price = new Price();
-        $price->setSecurity($security);
-        $price->setDate($data['Date']);
-        $security->Price[] = $price;
+        $count++;
+        $price = Doctrine_Query::create()
+            ->from('Price p')
+            ->where('security_id = ? AND date=?',array($security->id,$data['Date']))
+            ->fetchOne();
+        if(!$price)
+        {
+          $price = new Price();
+          $price->setSecurity($security);
+          $price->setDate($data['Date']);
+          $security->Price[] = $price;
+        }
+        $price->low = $data['Low'];
+        $price->open = $data['Open'];
+        $price->high = $data['High'];
+        $price->close = $data['Close'];
+        $price->volume = $data['Volume'];
       }
-      $price->low=$data['Low'];
-      $price->open=$data['Open'];
-      $price->high=$data['High'];
-      $price->close=$data['Close'];
-      $price->volume=$data['Volume'];
+      $reader->close();
+      $security->getPrice()->save();  
+    } 
+    catch (Exception $e) 
+    {
+      $this->logSection(__function__,$e->getMessage());
     }
-    $reader->close();
-    $security->getPrice()->save();
-    echo $count;
   }
 }

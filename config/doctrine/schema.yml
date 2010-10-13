@@ -164,6 +164,10 @@ Security:
     name:
       type: string(64)
       fixed: false
+    status:
+      type: enum
+      values: ['delisted','listed','suspend','expired']
+      default: 'listed'
   indexes:
     ticker_idx:
       fields: ['symbol','market']
