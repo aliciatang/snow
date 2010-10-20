@@ -2,7 +2,7 @@
 class Yahoo
 {
   private static $stockUrl='http://finance.yahoo.com/';
-  private static $priceUrl= 'http://download.finance.yahoo.com/d/quotes.csv?s=COH&f=sl1d1t1c1ohgv&e=.csv'
+  private static $priceUrl= 'http://download.finance.yahoo.com/d/quotes.csv?s=COH&f=sl1d1t1c1ohgv&e=.csv';
   public static $historyUrl = 'http://ichart.finance.yahoo.com/table.csv?';
   private static $tabs=array(
     'summary'=>'q?d=s&s=',

@@ -1,4 +1,12 @@
-<?php include_partial('security/holdingList',array('csecurities'=>$csecurities,'hsecurities'=>$hsecurities))?>
+<?php 
+  include_partial(
+    'security/holdingList',
+    array(
+      'csecurities'=>$csecurities,
+      'hsecurities'=>$hsecurities,
+      'balance' => $balance
+      )
+    )?>
 <?php slot('sidebar') ?>
 <table>
   <thead><th colspan="2">Account Summary</th></thead>

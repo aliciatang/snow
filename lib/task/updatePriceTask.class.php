@@ -37,18 +37,6 @@ EOF;
 
     // add your code here
     $this->logSection('updatePrice', $options['user'].": ".$options['user']);
-    if(isset($options['user']))
-    {
-      $user = Doctrine::getTable('sfGuardUser')->findOneByUsername($options['user']);
-    }
-    if(! $user)
-    {
-      $this->logSection('updatePrice', 'Cannot find user:'.$options['user']." do the update for all existing users.");
-      $users = Doctrine::getTable('sfGuardUser')->findAll();
-    }else
-    {
-      $users = array($user);
-    }
     $list = Doctrine_Manager::getInstance()
             ->getCurrentConnection()
             ->fetchColumn('SELECT DISTINCT s.`yahoo_id` FROM `account_security` sa LEFT JOIN (`security` s) on s.`id` = sa.`security_id`  WHERE sa.`quantity` >0 AND s.`id`>1',array(1),0);

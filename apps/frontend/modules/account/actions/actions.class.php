@@ -34,7 +34,9 @@ class accountActions extends sfActions
     if(! $accounts = $this->getUser()->getAttribute('accounts'))
     {
       $accounts = $this->getUser()->getGuardUser()->getAccounts();
+      $this->getUser()->setAttribute('accounts',$accounts);
     }
+    $this->balance = $accounts['total'];
     $this->account = $accounts[$id];
     $this->csecurities = AccountTable::getHoldings($id,'current');
     $this->hsecurities = AccountTable::getHoldings($id,'history');
