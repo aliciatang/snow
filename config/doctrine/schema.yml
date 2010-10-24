@@ -448,4 +448,16 @@ Performance:
        scale: 7
        default: '0.00'
        notnull: true
-
+HoldingHistory:
+  columns:
+    account_id: integer
+    security_id: integer
+    date: 
+      type: date
+      notnull: true
+    quantity: integer
+    market_value: 
+      type: decimal(16)
+      scale: 4
+      default: '0.00'
+      notnull: true
