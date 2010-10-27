@@ -461,3 +461,7 @@ HoldingHistory:
       scale: 4
       default: '0.00'
       notnull: true
+  indexes:
+    idx:
+      fields: ['account_id','security_id','date']
+      type: unique

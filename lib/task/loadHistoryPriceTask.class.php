@@ -45,7 +45,7 @@ EOF;
     //var_dump($ret);die;
     foreach($ret as $s)
     {
-      $this->updateOne($s['symbol'],$s['date1'],$s['date2']);
+      $this->updateOne($s['symbol'],date('Y-m-d'),$s['date2']);
     }
   }
   private function updateOne($symbol,$date1,$date2)
