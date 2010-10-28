@@ -22,4 +22,15 @@ class Account extends BaseAccount
   {
     return "****".substr($this->getNumber(),-4);
   }
+  public function getTransactions( $orderby = null)
+  {
+    $q = Doctrine_Query::create()
+              ->from('Transaction t')
+              ->where('t.account_id = ?', $this->id);
+    is_array($orderby)?array_unshift($orderby,'t.trade_date','id'):$orderby = array('t.trade_date','id');
+  
+    $q->orderBy(implode(',t.',$orderby));
+  
+    return $q->execute();
+  }
 }

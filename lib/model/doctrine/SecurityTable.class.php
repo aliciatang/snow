@@ -19,4 +19,15 @@ class SecurityTable extends Doctrine_Table
       }
       return $security;
     }
+    public function findOneByYahooId($symbol)
+    {
+      $security = self::getInstance()->findOneBy('yahoo_id',$symbol);
+      if(! $security)
+      {
+        $security = new Security();
+        $security->yahoo_id = $symbol;
+        $security->symbol = ucwords($symbol);
+      }
+      return $security;
+    }
 }

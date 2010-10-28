@@ -21,7 +21,7 @@ class SumUpTransactionsTask extends sfBaseTask
     $this->name             = 'sumUpTransactions';
     $this->briefDescription = 'Re-compute the sum for each transactions';
     $this->detailedDescription = <<<EOF
-The [SumUpTransactions|INFO] re-compute the sume for each transaction. 
+The [SumUpTransactions|INFO] re-compute the sum for each transaction. 
 This task need to be run every time new transaction is added.
 Call it with:
 
@@ -58,5 +58,21 @@ EOF;
             FROM `transaction` t 
             GROUP BY t.`account_id` 
             ON DUPLICATE KEY UPDATE `quantity`=VALUES(`quantity`),`amount`=VALUES(`amount`)');
+    $this->logSection('sum', "computing moving total for each account.");
+    $accounts = AccountTable::getInstance()->findAll();
+    foreach($accounts as $a)
+    {
+      $this->logSection('sum', "... computing account".$a['id']);
+      $transactions = $a->getTransactions();
+      $sum =0;
+      foreach($transactions as $t)
+      {
+        $sum += $t->amount;
+        //$this->logSection('sum', $a['id']." ".$t['trade_date']." ".$t['amount'].' '.$sum);
+        $t->total_amount = $sum;
+      }
+      $transactions->save();
+    }
+    
   }
 }

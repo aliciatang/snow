@@ -414,11 +414,10 @@ Performance:
   columns:
      account_id:
        type: integer
-       primary: true
      date: 
        type: date
        notnull: true
-     total_deposit:
+     deposit:
        type: decimal(16)
        scale: 4
        default: '0.00'
@@ -448,6 +447,10 @@ Performance:
        scale: 7
        default: '0.00'
        notnull: true
+  indexes:
+    idx:
+      fields: ['account_id','date']
+      type: unique
 HoldingHistory:
   columns:
     account_id: integer

@@ -35,17 +35,24 @@ EOF;
     // initialize the database connection
     $databaseManager = new sfDatabaseManager($this->configuration);
     $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
-    $ret = Doctrine_Manager::getInstance()
-          ->getCurrentConnection()
-          ->fetchAll('SELECT s.`yahoo_id` as `symbol`,max(t.`trade_date`) as `date1`, min(t.`trade_date`) as `date2` FROM `transaction` t LEFT JOIN `security` s ON s.id = t.security_id  WHERE `security_id` <> 1 && s.`market` <> "OPTION" GROUP BY `security_id`');
-    if(empty($ret))
+    if(! $options['symbol'])
     {
-      $this->logSection(get_class($this),'No transactions in database, no need to update price.');
+      $ret = Doctrine_Manager::getInstance()
+            ->getCurrentConnection()
+            ->fetchAll('SELECT s.`yahoo_id` as `symbol`,max(t.`trade_date`) as `date1`, min(t.`trade_date`) as `date2` FROM `transaction` t LEFT JOIN `security` s ON s.id = t.security_id  WHERE `security_id` <> 1 && s.`market` <> "OPTION" GROUP BY `security_id`');
+      if(empty($ret))
+      {
+        $this->logSection(get_class($this),'No transactions in database, no need to update price.');
+      }
+      //var_dump($ret);die;
+      foreach($ret as $s)
+      {
+        $this->updateOne($s['symbol'],date('Y-m-d'),max($s['date2'],$options['start']));
+      }
     }
-    //var_dump($ret);die;
-    foreach($ret as $s)
+    else
     {
-      $this->updateOne($s['symbol'],date('Y-m-d'),$s['date2']);
+      $this->updateOne($options['symbol'],date('Y-m-d'),$options['start']);
     }
   }
   private function updateOne($symbol,$date1,$date2)
@@ -73,7 +80,7 @@ EOF;
         ));
       $reader->open();
       $count=0;
-      $security = SecurityTable::findOneByScottradeId($symbol);
+      $security = SecurityTable::findOneByYahooId($symbol);
       while ($data = $reader->read())
       {
         $count++;
@@ -93,9 +100,9 @@ EOF;
         $price->high = $data['High'];
         $price->close = $data['Close'];
         $price->volume = $data['Volume'];
+        $price->save();
       }
       $reader->close();
-      $security->getPrice()->save();  
     } 
     catch (Exception $e) 
     {
