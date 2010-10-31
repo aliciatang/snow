@@ -18,10 +18,8 @@ class accountActions extends sfActions
   */
   public function executeIndex(sfWebRequest $request)
   {
-    //accounts ia an array not a doctrine_collection  
-    $this->accounts = $this->getUser()->getGuardUser()->getAccounts();
-    $this->getUser()->setAttribute('accounts',$this->accounts);
-    //SecurityTable::loadPrice();
+    $this->accounts = $this->getUser()->getAttribute('accounts');
+    //var_dump($this->accounts);
   }
   /**
     * Executes show action

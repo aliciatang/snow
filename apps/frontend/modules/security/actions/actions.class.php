@@ -17,12 +17,9 @@ class securityActions extends sfActions
   */
   public function executeIndex(sfWebRequest $request)
   {
-    if(! $accounts = $this->getUser()->getAttribute('accounts'))
-    {
-      $accounts = $this->getUser()->getGuardUser()->getAccounts();
-      $this->getUser()->setAttribute('accounts',$accounts);
-    }
-    $this->balance = $accounts['total'];
+    $this->accounts = $this->getUser()->getAttribute('accounts');
+    $this->balance = $this->accounts['total'];
+    $this->twr = $this->getUser()->getAttribute('twr');
     $this->csecurities = $this->getUser()->getGuardUser()->getSecurities('current');
     $this->hsecurities = $this->getUser()->getGuardUser()->getSecurities('history');
   }

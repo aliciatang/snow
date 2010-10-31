@@ -7,6 +7,7 @@
 <ul id="topNav" class="alpha omega grid_12">
   <li><?php echo link_to('Accounts','account/index')?></li>
   <li><?php echo link_to('Holdings','security/index')?></li>
+  <li><?php echo link_to('Performance','performance/index')?></li>
   <li><?php echo link_to('Watch List','price_alert/index')?></li>
 </ul>
 </div>

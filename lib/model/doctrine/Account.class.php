@@ -33,4 +33,48 @@ class Account extends BaseAccount
   
     return $q->execute();
   }
+  /**
+   * get the balance from transaction table by sum up all previous transactions
+   */
+  public function getBalance($date = null)
+  {
+    $date = date('Y-m-d',($date)?strtotime($date):time());
+    
+    $ret = Doctrine_Manager::getInstance()
+           ->getCurrentConnection()
+           ->fetchAll('SELECT sum(`amount`) as total_amount
+                       FROM `transaction` 
+                       WHERE `account_id`='.$this->id.' && `trade_date` <=\''.$date.'\'');
+    return isset($ret[0])?floatval($ret[0]['total_amount']):0;
+  }
+  
+  public function getMarketValue($date = null)
+  {
+    $date = date('Y-m-d',strtotime($date?$date:'yesterday'));
+    $ret = Doctrine_Query::create()
+       ->select('sum(market_value) as mkt_value')
+       ->from('HoldingHistory')
+       ->where('account_id = ?', $this->id)
+       ->andWhere("date ='".$date."'")
+       ->fetchArray();
+    return isset($ret[0])?floatval($ret[0]['mkt_value']):0;
+  }
+  /**
+   * get the total Deposit from transaction table by sum up all previous deposit
+   */
+  public function getDeposit($date = null)
+  {
+    $date = date('Y-m-d',($date)?strtotime($date):time());
+    $ret = Doctrine_Query::create()
+       ->select('sum(amount) as deposit')
+       ->from('transaction')
+       ->where('action_id NOT in (2,4,7)')
+       ->andWhere('amount >= 0')
+       ->andWhere("trade_date <='".$date."'")
+       ->andWhere('account_id = ?', $this->id)
+       ->andWhere('security_id = 1')
+       ->andWhere("description NOT LIKE '%BALANCE-SWP%'" )
+       ->fetchArray();
+     return isset($ret[0])?floatval($ret[0]['deposit']):0;
+  }
 }

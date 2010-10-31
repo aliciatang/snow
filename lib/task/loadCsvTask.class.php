@@ -83,6 +83,7 @@ EOF;
       $transaction->description = $data['Description'];
       $transaction->Action = $action;
       $transaction->Account = $account;
+      $transaction->save();
     }
     $reader->close();
     $account->setLastRecord(date('Y-m-d H:i:s'));

@@ -25,6 +25,5 @@
   $url .= "&chp=4.71";
   $url .= "&chma=0,0,0,0|0,700";
 ?>
-<?php slot('sidebar') ?>
+
 <img style="border: 1px solid #EEE" src="<?php echo $url;?>" />
-<?php end_slot() ?>

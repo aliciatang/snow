@@ -23,7 +23,7 @@ class sfGuardUser extends PluginsfGuardUser
    *         balance:
    *         deposit:    
    */
-  public function getAccounts()
+/*  public function getAccounts()
   {
     $ret = Doctrine_Manager::getInstance()
           ->getCurrentConnection()
@@ -50,6 +50,7 @@ class sfGuardUser extends PluginsfGuardUser
     $accounts['total']=$total;
     return $accounts;
   }
+*/
   /**
    *
    */
