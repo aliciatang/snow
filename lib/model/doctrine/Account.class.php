@@ -50,13 +50,23 @@ class Account extends BaseAccount
   
   public function getMarketValue($date = null)
   {
-    $date = date('Y-m-d',strtotime($date?$date:'yesterday'));
     $ret = Doctrine_Query::create()
        ->select('sum(market_value) as mkt_value')
        ->from('HoldingHistory')
        ->where('account_id = ?', $this->id)
-       ->andWhere("date ='".$date."'")
-       ->fetchArray();
+    ;
+    if($date)
+    {
+      $date = date('Y-m-d',strtotime($date));
+      $ret->andWhere("date ='".$date."'");
+    }
+    else
+    {
+      $ret->groupBy('date')
+          ->orderBy("date DESC")
+          ->limit('1');
+    }
+    $ret = $ret->fetchArray();
     return isset($ret[0])?floatval($ret[0]['mkt_value']):0;
   }
   /**

@@ -36,13 +36,17 @@ EOF;
 
     // add your code here
     $this->logSection('performance', 'computing market value');
-    $ret = Doctrine_Manager::getInstance()
-           ->getCurrentConnection()
-           ->execute('INSERT INTO `performance` (`account_id`,`date`,`security_market_value`)
-                      SELECT `account_id`,`date`,sum(`market_value`) 
-                      FROM `holding_history`
-                      GROUP BY `account_id`,`date`
-                      ON DUPLICATE KEY UPDATE `security_market_value`=VALUES(`security_market_value`)');
+    $accounts = AccountTable::getInstance()->findAll();
+    foreach($accounts as $a)
+    { 
+      $id = $a['id'];
+      $ret = Doctrine_Manager::getInstance()
+             ->getCurrentConnection()
+             ->execute('INSERT INTO `performance` (`account_id`,`date`,`security_market_value`)
+                        SELECT '.$id.',p.date, IFNULL(security_market_value,0) as security_market_value 
+                        FROM (select distinct date from price where date>= (select min(trade_date) from transaction where account_id='.$id.')) p left join (SELECT`date`,sum(`market_value`) as security_market_value FROM `holding_history` where account_id='.$id.' GROUP BY `date`) b on b.date=p.date order by p.date
+                        ON DUPLICATE KEY UPDATE `security_market_value`=VALUES(`security_market_value`)');
+    }
     $this->logSection('performance', 'computing deposit');
     $ret = Doctrine_Manager::getInstance()
            ->getCurrentConnection()
@@ -54,27 +58,25 @@ EOF;
                       ON DUPLICATE KEY UPDATE `deposit`=VALUES(`deposit`)');
     
     $this->logSection('performance', 'computing cash balance');
-    $performances = PerformanceTable::getInstance()->findAll();
-    foreach($performances as $p )
-    {
-      $ret = Doctrine_Manager::getInstance()
-             ->getCurrentConnection()
-             ->fetchAll('SELECT `total_amount`  FROM `transaction` WHERE `account_id`='.$p['account_id'].' && `trade_date` = 
-                        (SELECT MAX(trade_date) FROM `transaction` WHERE `trade_date` <=\''.$p['date'].'\' && account_id='.$p['account_id'].')
-                        ORDER BY `id` DESC');
-      $p->cash_balance = $ret[0]['total_amount'];
-      $p->save();
-    }
+    $ret = Doctrine_Manager::getInstance()
+           ->getCurrentConnection()
+           ->execute('INSERT INTO `performance` (`account_id`,`date`,`cash_balance`)
+                      SELECT DISTINCT p.`account_id`,date, (SELECT sum(t.`amount`) FROM `transaction` t  WHERE t.`account_id`=p.`account_id` AND t.`trade_date`<=p.`date`) FROM `performance` p
+                      ON DUPLICATE KEY UPDATE `cash_balance`=VALUES(`cash_balance`)');
     $ret = Doctrine_Manager::getInstance()
            ->getCurrentConnection()
            ->execute('UPDATE `performance` p SET p.`total_market_value`=p.`security_market_value`+p.`cash_balance`');
-    $accounts = AccountTable::getInstance()->findAll();
+    
+    $accounts = Doctrine_Manager::getInstance()
+                ->getCurrentConnection()
+                ->fetchAll('SELECT distinct `account_id` FROM `transaction`');
+    //var_dump($accounts);
     foreach($accounts as $a)
     {
-      $this->logSection('performance', "... computing account".$a['id']);
+      $this->logSection('performance', "... computing account".$a['account_id']);
       $q = Doctrine_Query::create()
              ->from('Performance t')
-             ->where('t.account_id = ?', $a['id'])
+             ->where('t.account_id = ?', $a['account_id'])
              ->orderBy('t.date');
       $performances = $q->execute();
       $performances[0]->time_weighted_return=1;
@@ -82,7 +84,7 @@ EOF;
      // if($a['id']==2)var_dump($performances[0]->toArray());
       for($i = 1; $i < $performances->count(); $i++)
       {
-       // if($a['id']==2)var_dump($performances[$i]->toArray());
+        if($performances[$i-1]->total_market_value==0)var_dump($performances[$i-1]->toArray());
         $performances[$i]->time_weighted_return=($performances[$i]->total_market_value-$performances[$i]->deposit)/($performances[$i-1]->total_market_value)*$performances[$i-1]->time_weighted_return;
         $performances[$i]->save();
       //  if($a['id']==2)var_dump($performances[$i]->toArray());

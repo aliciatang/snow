@@ -8,6 +8,7 @@
       )
     )?>
 <?php slot('sidebar') ?>
+<?php include_partial('security/holdingChart',array('csecurities'=>$csecurities,'balance' => $balance));?>
 <table>
   <thead><th colspan="2">Account Summary</th></thead>
   <tbody>

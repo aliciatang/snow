@@ -20,7 +20,7 @@ class PerformanceTable extends Doctrine_Table
     {
       $ret = Doctrine_Manager::getInstance()
              ->getCurrentConnection()
-             ->fetchAll('select * from (select date, sum(deposit) as deposit, sum(total_market_value) as market_value from performance group by date) a join (select date, close from price where security_id=39 ) p ON p.date=a.date');
+             ->fetchAll('select * from (select date, sum(deposit) as deposit, sum(total_market_value) as market_value from performance group by date) a join (select date, close from price where security_id=39 ) p ON p.date=a.date ');
       $ret[0]['twr']=1;
       for($i=1; $i<count($ret); $i++)
       {

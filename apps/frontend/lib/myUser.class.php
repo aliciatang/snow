@@ -7,11 +7,22 @@ class myUser extends sfGuardSecurityUser
     parent::__construct($ed,$st);
     $this->init();
   }
+  /**
+   * cache Accounts of the user which have records 
+   * and compute the market value and gains for the latest date on record.
+   * @return Array an array with key as account_id (or Total), 
+   * and contains columns for 
+   *         number: **** dd 
+   *         account_type:
+   *         mkt_value:
+   *         balance:
+   *         deposit:    
+   */
   private function init()
   {
     if(!$this->isAuthenticated()) return;
     $accounts = $this->getAttribute('accounts',array());
-    //if(!empty($accounts)) return;
+    if(!empty($accounts)) return;
     $accounts['total']['number'] = 'Total';
     $accounts['total']['type'] = 'All';
     $accounts['total']['balance'] = 0;
@@ -40,7 +51,7 @@ class myUser extends sfGuardSecurityUser
       $accounts['total']['gain']      +=$g;
     }
     $accounts['total']['pgain'] = $accounts['total']['gain']/$accounts['total']['deposit']*100;
-    //var_dump($accounts);
+    //var_dump(count($accounts));
     $this->setAttribute('accounts',$accounts); 
   }
 

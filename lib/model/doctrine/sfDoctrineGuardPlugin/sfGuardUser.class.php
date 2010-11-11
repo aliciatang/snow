@@ -13,45 +13,6 @@
 class sfGuardUser extends PluginsfGuardUser
 {
   /**
-   * get Accounts of the user which have records 
-   * and compute the market value and gains for the latest date on record.
-   * @return Array an array with key as account_id (or Total), 
-   * and contains columns for 
-   *         number: **** dd 
-   *         account_type:
-   *         mkt_value:
-   *         balance:
-   *         deposit:    
-   */
-/*  public function getAccounts()
-  {
-    $ret = Doctrine_Manager::getInstance()
-          ->getCurrentConnection()
-          ->fetchAll('SELECT m.`id`,`number`,`type`,`mkt_value`,`balance`,`deposit`,((mkt_value+balance)/deposit-1)*100 as `gain` 
-                      FROM (SELECT a.`id`,a.`number`,a.`type`,SUM(sa.`quantity`*p.`cprice`) as `mkt_value` FROM `account_security` sa LEFT JOIN (`account` a, `price` p) on (a.`id`=sa.`account_id` && p.`security_id`=sa.`security_id`) WHERE sa.`security_id`>1 && a.user_id='.$this->getId().' && p.`date`=(select max(p2.`date`) FROM `price` p2 WHERE p.`security_id`=p2.`security_id`)  GROUP BY a.`id`) m 
-                      LEFT JOIN (SELECT a.`id`,SUM(sa.`amount`) AS `balance`,SUM(sa.`sell_amount`) AS `deposit` FROM `account_security` sa LEFT JOIN `account` a on a.`id`=sa.`account_id` WHERE sa.`security_id`=1 && a.user_id='.$this->getId().' GROUP BY a.`id`) b 
-                      ON b.`id`=m.`id`');
-    $total = array();
-    $total['number']    = 'Total';
-    $total['type']      = 'ALL';
-    $total['mkt_value'] = 0;
-    $total['balance']   = 0;
-    $total['deposit']   = 0;
-    $accounts = array();
-    foreach($ret as $key=>$a)
-    {
-      $a['number'] ='**** '.substr($a['number'],-2);
-      $total['mkt_value'] += $a['mkt_value'];
-      $total['deposit']   += $a['deposit'];
-      $total['balance']   += $a['balance'];
-      $accounts[$a['id']] = $a;
-    }
-    $total['gain'] = (($total['mkt_value']+$total['balance'])/$total['deposit']-1)*100;
-    $accounts['total']=$total;
-    return $accounts;
-  }
-*/
-  /**
    *
    */
   public function getSecurities( $state='current')
@@ -61,7 +22,7 @@ class sfGuardUser extends PluginsfGuardUser
       case 'current':
         $ret = Doctrine_Manager::getInstance()
               ->getCurrentConnection()
-              ->fetchAll('SELECT s.`symbol`,SUM(sa.`quantity`) `quantity`, IF(SUM(sa.`buy_quantity`) > 0,SUM(sa.`buy_amount`)/SUM(sa.`buy_quantity`),0)*(-1) as `buy_price`,p.`cprice` as `sell_price`, (p.`cprice`/SUM(sa.`buy_amount`)*SUM(sa.`buy_quantity`)*(-1)-1)*100 as gain,SUM(sa.`quantity`)*p.`cprice` as mkt_value, SUM(sa.`dividend`) AS dividend, SUM(sa.`quantity`)*p.`cprice`+SUM(sa.`dividend`)+SUM(sa.`buy_amount`) AS total_gain FROM `account_security` sa LEFT JOIN (`security` s, `account` a, `price` p) ON s.id = sa.`security_id` && a.id=sa.`account_id` && p.`security_id`=s.id  WHERE sa.`quantity` >0 && sa.`security_id` > 1 && p.`date` = (select MAX(p2.`date`) FROM `price` p2 WHERE p2.`security_id`=p.`security_id`) && a.user_id='.$this->getId().' GROUP BY sa.`security_id` ORDER BY (SUM(sa.`quantity`)*p.`cprice` ) DESC');
+              ->fetchAll('select a.*,a.cprice as sell_price, (a.cprice-a.buy_price)/a.buy_price*100 as gain from (select IFNULL(p.cprice,0) as cprice,t.security_id,(select SUBSTR(symbol,1,6) from security where id=t.security_id) as symbol, sum(t.quantity) as quantity,IFNULL(p.cprice,0)*sum(t.quantity) as mkt_value, sum(IF(t.quantity>0,amount,0))/sum(IF(t.action_id IN (1,46,48),t.quantity,0))*(-1) as buy_price, sum(IF(t.action_id in (2,4,7),t.amount,0)) as dividend, sum(`quantity`)*p.cprice+sum(IF(t.action_id in (2,4,7),t.amount,0)) as total_gain from transaction t left join (select p2.security_id,p2.cprice from price p2 where p2.date=(select max(p3.date) from price p3 where p3.security_id=p2.security_id)) p on p.security_id=t.security_id where t.account_id in (select id from account where user_id='.$this->getId().') group by t.security_id having quantity > 0 order by sum(quantity)*p.cprice desc ) a');
         break;
       case 'history':
         $ret = Doctrine_Manager::getInstance()

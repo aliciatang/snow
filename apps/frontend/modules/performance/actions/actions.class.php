@@ -18,7 +18,8 @@ class performanceActions extends sfActions
   public function executeIndex(sfWebRequest $request)
   {
     $this->data = PerformanceTable::getPerformanceData();
-    $twr = count($this->data)-2;
+    $twr = count($this->data)-1;
+    //var_dump($this->data[$twr]);
     $twr = $this->data[$twr]['twr'];
     $this->getUser()->setAttribute('twr',$twr);
   }

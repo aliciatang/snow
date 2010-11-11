@@ -45,7 +45,7 @@ EOF;
           ->getCurrentConnection()
           ->execute('INSERT INTO `holding_history` (`account_id`,`security_id`,`date`,`quantity`, `market_value`)
                      SELECT t.`account_id`,t.`security_id`,"'.$date.'", sum(`quantity`) as q, p.close*sum(`quantity`)
-                     FROM `transaction` t LEFT JOIN `price` p ON p.`security_id`=t.`security_id` WHERE t.`trade_date`<="'.$date.'" && p.`date`="'.$date.'"
+                     FROM `transaction` t LEFT JOIN `price` p ON p.`security_id`=t.`security_id` WHERE t.`trade_date`<="'.$date.'" && t.`action_id` NOT IN (17,18 ) && p.`date`="'.$date.'"
                      GROUP BY t.`account_id`,t.`security_id` HAVING q <>0
                      ON DUPLICATE KEY UPDATE `quantity`=VALUES(`quantity`), `market_value`=VALUES(`market_value`)');
       $this->logSection('hh:', "computing for date:".$date);
