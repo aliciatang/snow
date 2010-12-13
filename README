@@ -1,4 +1,9 @@
 PHP Project using symfony frame work version 1.4
+username 'Alicia Tang'
+email 'alicia.x.tang@gmail.com'
+
+Download/Installation:
+#git clone:git@github.com:aliciatang/snow.git
 
 Required symfony plugins
 1.sfCsvPlugin
