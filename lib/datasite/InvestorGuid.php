@@ -1,0 +1,1 @@
+http://app.quotemedia.com/quotetools/clientForward?targetURL=http%3A%2F%2Fwww.investorguide.com%2Fquotemedia%2Fframe.php%3Ftype%3Dhistorical%26ticker%3DBNI&targetsym=&targettype=&targetex=&qmpage=true&symbol=BNI&action=showHistory&page=1&perPage=100&startMonth=7&startDay=3&startYear=2007&endMonth=1&endDate=17&endYear=2010
