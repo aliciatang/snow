@@ -21,3 +21,10 @@ Download/Installation
 
 Optional symfony plugins
 1.swFunctionalTestGenerationPlugin
+
+Setup steps:
+1. symfony snow:loadCsv --account='number' --file='path_to_csv_data'
+2. symfony snow:update-history-price
+3. symfony snow:holdingHistory
+4. symfony snow:performance
+
