@@ -8,7 +8,7 @@ class SecurityTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Security');
     }
-    public function findOneByScottradeId($symbol)
+    public static function findOneByScottradeId($symbol)
     {
       $security = self::getInstance()->findOneBy('scottrade_id',$symbol);
       if(! $security)
@@ -19,7 +19,7 @@ class SecurityTable extends Doctrine_Table
       }
       return $security;
     }
-    public function findOneByYahooId($symbol)
+    public static function findOneByYahooId($symbol)
     {
       $security = self::getInstance()->findOneBy('yahoo_id',$symbol);
       if(! $security)

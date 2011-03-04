@@ -23,7 +23,11 @@ class sfGuardUser extends PluginsfGuardUser
         $ret = Doctrine_Manager::getInstance()
               ->getCurrentConnection()
               ->fetchAll('select a.*,a.cprice as sell_price, (a.cprice-a.buy_price)/a.buy_price*100 as gain from (select IFNULL(p.cprice,0) as cprice,t.security_id,(select SUBSTR(symbol,1,6) from security where id=t.security_id) as symbol, sum(t.quantity) as quantity,IFNULL(p.cprice,0)*sum(t.quantity) as mkt_value, sum(IF(t.quantity>0,amount,0))/sum(IF(t.action_id IN (1,46,48),t.quantity,0))*(-1) as buy_price, sum(IF(t.action_id in (2,4,7),t.amount,0)) as dividend, sum(`quantity`)*p.cprice+sum(IF(t.action_id in (2,4,7),t.amount,0)) as total_gain from transaction t left join (select p2.security_id,p2.cprice from price p2 where p2.date=(select max(p3.date) from price p3 where p3.security_id=p2.security_id)) p on p.security_id=t.security_id where t.account_id in (select id from account where user_id='.$this->getId().') group by t.security_id having quantity > 0 order by sum(quantity)*p.cprice desc ) a');
-        break;
+/*        $cash = Doctrine_Manager::getInstance()
+               ->getCurrentConnection()
+               ->fetchAll("select 'Cash' as symbol,s.total as quantity,s.total as mkt_value,'0' as gain, '0' as dividend, '1' as buy_price from (select sum(t.amount) as total from transaction t) s");
+        $ret[]=$cash[0];
+*/        break;
       case 'history':
         $ret = Doctrine_Manager::getInstance()
               ->getCurrentConnection()

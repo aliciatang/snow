@@ -8,7 +8,7 @@ class ActionTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Action');
     }
-    public function findOneByIdName($id,$name)
+    public static function findOneByIdName($id,$name)
     {
       $action = self::getInstance()->findOneBy('id',$id);
       if(! $action)

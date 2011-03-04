@@ -19,8 +19,8 @@ class DalyPerformanceTask extends sfBaseTask
     $this->addOption('account',null,sfCommandOption::PARAMETER_REQUIRED,'account id not account number');
     
     $this->namespace        = 'snow';
-    $this->name             = 'dp';
-    $this->briefDescription = 'Re-compute the sum for each transactions';
+    $this->name             = 'daily-performance';
+    $this->briefDescription = 'Re-compute the daily performance for the given account';
     $this->detailedDescription = <<<EOF
 The [performance|INFO] compute the performance for the given date. 
 Use this to patch the performance tabe if any date is missing.

@@ -98,9 +98,29 @@ class Yahoo
     $url .= "&f=".date('Y',strtotime($max));
     $url .= '&g=d';
     $url .= '&ignore=.csv';
-    echo $url;
+    echo $url.PHP_EOL;
     $content = file_get_contents($url);
-    
+    $filename = 'data/csv/'.$symbol.'.csv';
+    $fh = fopen($filename,'w');
+    fwrite($fh, $content);
+    fclose($fh);
+    $reader = new sfCsvReader($filename);
+    $reader->setSelectColumns(array(
+      'Date','Open','High','Low','Close','Volume','Adj Close'
+      ));
+    $reader->open();
+    $sercurity = SecurityTable::findOneByScottradeId($symbol);
+    while ($data = $reader->read())
+    {
+       $price = PriceTable::findOneBySdate($sercurity->id,$data['Date']);
+       $price->open = $data['Open'];
+       $price->high = $data['High'];
+       $price->low  = $data['Low'];
+       $price->close = $data['Close'];
+       $price->volume = $data['Volume'];
+       $price->save();
+    }
+    $reader->close();
   }
   public static function loadPricesFromCsv($list)
   {
