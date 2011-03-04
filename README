@@ -1,10 +1,23 @@
 PHP Project using symfony frame work version 1.4
+username 'Alicia Tang'
+email 'alicia.x.tang@gmail.com'
 
-Required symfony plugins
-1.sfCsvPlugin
-2.sfDoctrineApplyPlugin
-3.sfDoctrineGuardLoginHistoryPlugin
-4.sfDoctrineGuardPlugin
+Download/Installation 
+1. Install source code:
+# git clone:git@github.com:aliciatang/snow.git
+2. Install Symfony:
+# mkdir lib/vendor
+# svn checkout 'http://svn.symfony-project.com/branches/1.4/' lib/vendor/1.4
+
+3. Install required plugins:
+3.1 sfCsvPlugin
+# svn checkout 'http://svn.symfony-project.com/plugins/sfCsvPlugin/trunk' plugins/sfCsvPlugin
+3.2 sfDoctrineApplyPlugin
+# svn checkout 'http://svn.symfony-project.com/plugins/sfDoctrineApplyPlugin/trunk' plugins/sfDoctrineApplyPlugin
+3.3 sfDoctrineGuardLoginHistoryPlugin
+# svn co 'http://svn.symfony-project.com/plugins/sfDoctrineGuardLoginHistoryPlugin/trunk' plugins/sfDoctrineGuardLoginHistoryPlugin
+3.4 sfDoctrineGuardPlugin
+# svn co 'http://svn.symfony-project.com/plugins/sfDoctrineGuardPlugin/trunk' plugins/sfDoctrineGuardPlugin
 
 Optional symfony plugins
 1.swFunctionalTestGenerationPlugin
