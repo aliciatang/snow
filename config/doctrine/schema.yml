@@ -1,3 +1,9 @@
+User:
+  inheritance:
+    type:             column_aggregation
+    extends:          sfGuardUser
+    keyField:         is_super_admin
+    keyValue:         false
 Account:
   connection: doctrine
   options:
@@ -60,7 +66,7 @@ Account:
       fields: ['user_id']
   relations:
     User:
-      class: sfGuardUser
+      class: User
       local: user_id
       type: one
       foreignAlias: Accounts
@@ -69,6 +75,11 @@ Account:
       foreignAlias: Accounts
       class: Security
       refClass: AccountSecurity
+    Transactions:
+      orderBy: trade_date ASC
+    HoldingHistories:
+      class: HoldingHistory
+      orderBy: date DESC
 Action:
   connection: doctrine
   options:
@@ -254,8 +265,58 @@ Synthetic:
       local: id
       foreign: synthetic_id
       type: many
-
 Transaction:
+  actAs:
+    MovingTotal:
+      balance:
+        column: amount
+        totalColumn: balance
+        orderBy: trade_date
+      quantity:
+        column: quantity
+        totalColumn: total_quantity
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+      total_buy_quantity:
+        column: quantity
+        totalColumn: total_buy_quantity
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+        condition:
+          column: action_id
+          values: [1,46,47]
+      total_buy_amount:
+        column: amount
+        totalColumn: total_buy_amount
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+        condition:
+          column: action_id
+          values: [1,46,47]
+      total_sell_quantity:
+        column: quantity
+        totalColumn: total_sell_quantity
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+        condition:
+          column: action_id
+          values: [13,24,48,49]
+      total_sell_amount:
+        column: amount
+        totalColumn: total_sell_amount
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+        condition:
+          column: action_id
+          values: [13,24,48,49]
+      dividend:
+        column: amount
+        totalColumn: dividend
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+        condition:
+          column: action_id
+          values: [2]
   connection: doctrine
   tableName: transaction
   options:
@@ -303,7 +364,10 @@ Transaction:
     synthetic_id:
       type: integer
       notnull: false
-    total_amount:
+    holding_history_id:
+      type: integer(4)
+      default: null
+    balance:
       type: decimal(16)
       scale: 4
       default: '0.00'
@@ -335,6 +399,11 @@ Transaction:
       scale: 4
       default: '0.00'
       notnull: true
+    dividend:
+      type: decimal(16)
+      scale: 4
+      default: '0.00'
+      notnull: true
     prev_tran:
       type: integer
       default: null
@@ -362,6 +431,10 @@ Transaction:
       local: synthetic_id
       foreign: id
       type: one
+    HoldingHistory:
+      local: holding_history_id
+      type: one
+      foreign: id
 Alert:
   actAs: [Timestampable]
   columns:
@@ -459,7 +532,18 @@ HoldingHistory:
       type: date
       notnull: true
     quantity: integer
+    buy_price:
+      type: decimal(16)
+      scale: 4
+    price:
+      type: decimal(16)
+      scale: 4
     market_value: 
+      type: decimal(16)
+      scale: 4
+      default: '0.00'
+      notnull: true
+    dividend:
       type: decimal(16)
       scale: 4
       default: '0.00'
