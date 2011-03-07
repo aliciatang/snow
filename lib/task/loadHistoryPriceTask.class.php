@@ -93,7 +93,7 @@ EOF;
           $price = new Price();
           $price->setSecurity($security);
           $price->setDate($data['Date']);
-          $security->Price[] = $price;
+          $security->Prices[] = $price;
         }
         $price->low = $data['Low'];
         $price->open = $data['Open'];

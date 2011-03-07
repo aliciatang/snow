@@ -109,7 +109,7 @@ class Yahoo
       'Date','Open','High','Low','Close','Volume','Adj Close'
       ));
     $reader->open();
-    $sercurity = SecurityTable::findOneByScottradeId($symbol);
+    $sercurity = SecurityTable::findOneByYahooId($symbol);
     while ($data = $reader->read())
     {
        $price = PriceTable::findOneBySdate($sercurity->id,$data['Date']);

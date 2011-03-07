@@ -18,73 +18,82 @@ class Account extends BaseAccount
   {
     return ucfirst($this->getAgency()).": ****".substr($this->getNumber(),-4);
   }
+  public function getSlug()
+  {
+    return substr($this->getNumber(), -2);
+  }
   public function getDisplayNumber()
   {
     return "****".substr($this->getNumber(),-4);
   }
-  public function getTransactions( $orderby = null)
+  public function getBalance()
   {
-    $q = Doctrine_Query::create()
-              ->from('Transaction t')
-              ->where('t.account_id = ?', $this->id);
-    is_array($orderby)?array_unshift($orderby,'t.trade_date','id'):$orderby = array('t.trade_date','id');
-  
-    $q->orderBy(implode(',t.',$orderby));
-  
-    return $q->execute();
+    return $this->getLatestTransaction()->balance;
   }
   /**
    * get the balance from transaction table by sum up all previous transactions
    */
-  public function getBalance($date = null)
+  public function getBalanceByDate($date = null)
   {
-    $date = date('Y-m-d',($date)?strtotime($date):time());
-    
-    $ret = Doctrine_Manager::getInstance()
-           ->getCurrentConnection()
-           ->fetchAll('SELECT sum(`amount`) as total_amount
-                       FROM `transaction` 
-                       WHERE `account_id`='.$this->id.' && `trade_date` <=\''.$date.'\'');
-    return isset($ret[0])?floatval($ret[0]['total_amount']):0;
+    if(! $date) return $this->getBalance();
+    $t = TransactionTable::getInstance()->createQuery('t')
+              ->select('t.balance')
+              ->orderBy('t.trade_date DESC')
+              ->addOrderBy('t.id DESC')
+              ->where('t.trade_date <= ?', date('Y-m-d',strtotime($date)))
+              ->andWhere('t.account_id = ?', $this->id)
+              ->fetchOne(array(), Doctrine::HYDRATE_SCALAR);
+    return $t['t_balance'];
   }
   
   public function getMarketValue($date = null)
   {
-    $ret = Doctrine_Query::create()
-       ->select('sum(market_value) as mkt_value')
-       ->from('HoldingHistory')
-       ->where('account_id = ?', $this->id)
-    ;
-    if($date)
+    $transactions = $this->getLatestTransactions();
+    $total = 0;
+    foreach($transactions as $security_id => $transaction)
     {
-      $date = date('Y-m-d',strtotime($date));
-      $ret->andWhere("date ='".$date."'");
+      $price = $transaction->Security->LatestPrice;
+      $price = $price->close;
+      $quantity = $transaction->total_quantity;
+      $value = $quantity*$price;
+      $total += $value;
     }
-    else
-    {
-      $ret->groupBy('date')
-          ->orderBy("date DESC")
-          ->limit('1');
-    }
-    $ret = $ret->fetchArray();
-    return isset($ret[0])?floatval($ret[0]['mkt_value']):0;
+    return $total;
   }
   /**
    * get the total Deposit from transaction table by sum up all previous deposit
    */
-  public function getDeposit($date = null)
+  public function getDeposit()
   {
-    $date = date('Y-m-d',($date)?strtotime($date):time());
-    $ret = Doctrine_Query::create()
-       ->select('sum(amount) as deposit')
-       ->from('transaction')
-       ->where('action_id NOT in (2,4,7)')
-       ->andWhere('amount >= 0')
-       ->andWhere("trade_date <='".$date."'")
-       ->andWhere('account_id = ?', $this->id)
-       ->andWhere('security_id = 1')
-       ->andWhere("description NOT LIKE '%BALANCE-SWP%'" )
-       ->fetchArray();
-     return isset($ret[0])?floatval($ret[0]['deposit']):0;
+    return $this->getLatestTransaction()->deposit;
+  }
+  public function getDepositByDate($date = null)
+  {
+    if(! $date) return $this->getDeposit();
+    $t = TransactionTable::getInstance()->createQuery('t')
+              ->select('t.deposit')
+              ->orderBy('t.trade_date DESC')
+              ->addOrderBy('t.id DESC')
+              ->where('t.trade_date <= ?', date('Y-m-d',strtotime($date)))
+              ->andWhere('t.account_id = ?', $this->id)
+              ->fetchOne(array(), Doctrine::HYDRATE_SCALAR);
+    return $t['t_deposit']; 
+  }
+  public function getLatestTransactions()
+  {
+    $securities = $this->getSecurities();
+    $transactions = array();
+    foreach($securities as $s)
+    {
+      $transaction = TransactionTable::getInstance()
+                     ->createQuery('t')
+                     ->where('t.account_id = ?', $this->id)
+                     ->andWhere('t.security_id = ?', $s->id)
+                     ->orderBy('t.trade_date DESC')
+                     ->addOrderBy('t.id DESC')
+                     ->fetchOne();
+      $transactions[$s->id]=$transaction;
+    }
+    return $transactions;
   }
 }

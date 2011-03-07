@@ -1,5 +1,8 @@
 <?php
 
+require_once dirname(__FILE__).'/../lib/accountGeneratorConfiguration.class.php';
+require_once dirname(__FILE__).'/../lib/accountGeneratorHelper.class.php';
+
 /**
  * account actions.
  *
@@ -8,36 +11,6 @@
  * @author     Your name here
  * @version    SVN: $Id: actions.class.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
  */
-class accountActions extends sfActions
+class accountActions extends autoAccountActions
 {
-
- /**
-  * Executes index action
-  *
-  * @param sfRequest $request A request object
-  */
-  public function executeIndex(sfWebRequest $request)
-  {
-    $this->accounts = $this->getUser()->getAttribute('accounts');
-    //var_dump($this->accounts);
-  }
-  /**
-    * Executes show action
-    *
-    * @param sfRequest $request A request object
-    */
-  public function executeShow(sfWebRequest $request)
-  {
-    $id=$request->getParameter('id');
-    if(! $accounts = $this->getUser()->getAttribute('accounts'))
-    {
-      $accounts = $this->getUser()->getGuardUser()->getAccounts();
-      $this->getUser()->setAttribute('accounts',$accounts);
-    }
-    $this->balance = $accounts['total'];
-    $this->account = $accounts[$id];
-    $this->csecurities = AccountTable::getHoldings($id,'current');
-    $this->hsecurities = AccountTable::getHoldings($id,'history');
-    
-  }
 }

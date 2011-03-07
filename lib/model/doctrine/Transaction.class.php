@@ -12,4 +12,11 @@
  */
 class Transaction extends BaseTransaction
 {
+  public function preInsert($event)
+  {
+    if($this->action_id == 16 && $this->description == 'MONEY DIRECT DEPOSIT')
+    {
+      $this->action_id = 109;
+    }
+  }
 }

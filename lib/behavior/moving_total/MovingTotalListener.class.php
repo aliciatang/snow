@@ -8,12 +8,9 @@ class MovingTotalListener extends Doctrine_Record_Listener
   }
   public function postInsert(Doctrine_Event $event)
   {
-    echo PHP_EOL;
     $invoker = $event->getInvoker();
-    echo "invoker sid:".$invoker->security_id.PHP_EOL;
     foreach($this->_options as $name => $options)
     {
-      echo "set name:".$name.PHP_EOL;
       $table = Doctrine::getTable($options['className']);
       // get the previous moving total
       $q = $table->createQuery()
@@ -44,13 +41,11 @@ class MovingTotalListener extends Doctrine_Record_Listener
         $ret = in_array($invoker->$options['condition']['column'],$options['condition']['values']);
         $value = $ret ? $value: 0;
       }
-      echo "prev:".$prev;echo "value:".$value.PHP_EOL;
       $invoker->$options['totalColumn'] = $prev + $value;
       $invoker->save();
       // update the succeeding moving totals if any
       if($value == 0) continue;
       $update = $options['totalColumn']." + '".$value."' ";
-      var_dump($update);
       $q = $table
         ->createQuery()
         ->update()
@@ -68,6 +63,5 @@ class MovingTotalListener extends Doctrine_Record_Listener
       }
       $q->execute();
     }
-    echo PHP_EOL;
   }
 }

@@ -1,0 +1,29 @@
+generator:
+  class: sfDoctrineGenerator
+  param:
+    model_class:           Account
+    theme:                 admin
+    non_verbose_templates: true
+    with_show:             false
+    singular:              ~
+    plural:                ~
+    route_prefix:          account
+    with_doctrine_route:   true
+    actions_base_class:    sfActions
+
+    config:
+      actions: ~
+      fields:
+        slug:       { label: Number }
+      list:    
+        title: Account List
+        display: [=slug, agency,balance,deposit,market_value]
+        object_actions: {}
+        batch_actions: {}
+        sort: [ deposit ]
+      filter: 
+        class: false
+      form:    ~
+      edit:    
+        title: Editing Account %%slug%% (%%agency%%)
+      new:     ~

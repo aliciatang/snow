@@ -36,10 +36,18 @@ EOF;
     $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
 
     // add your code here
+    $list = array();
     if(! $options['symbol'])
-    $list = Doctrine_Manager::getInstance()
-            ->getCurrentConnection()
-            ->fetchColumn('SELECT DISTINCT s.`yahoo_id` FROM `account_security` sa LEFT JOIN (`security` s) on s.`id` = sa.`security_id`  WHERE sa.`quantity` >0 AND s.`id`>1 && s.`market` <>\'OPTION\' && s.status="listed"',array(1),0);
+    {
+       $q = SecurityTable::getInstance()
+            ->createQuery('s')
+            ->select('s.yahoo_id')
+            ->where('s.status = ?', 'listed')
+            ->andWhere("s.market <> 'OPTION' ")
+            ->andWhere("s.market <> '' ")
+            ->fetchArray(array(),Doctrine::HYDRATE_SCALAR  );
+       foreach($q as $s) $list[]=$s['yahoo_id'];
+    }
     else $list =array($options['symbol']);
     foreach($list as $s)
     {

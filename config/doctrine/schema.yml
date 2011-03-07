@@ -1,16 +1,30 @@
 User:
+  actAs:
+    Sluggable:
+      unique: true
+      fields: [first_name, last_name]
+      canUpdate: true
+      name: username
+  columns:
+    phonic_first: string
+    phonic_last: string
   inheritance:
     type:             column_aggregation
     extends:          sfGuardUser
     keyField:         is_super_admin
     keyValue:         false
 Account:
+  actAs:
+    Timestampable: ~
+    Sluggable:
+      unique: true
+      fields: [agency, type]
+      canUpdate: true
   connection: doctrine
   options:
     collate: utf8_unicode_ci
     charset: utf8
   tableName: account
-  actAs: [Timestampable]
   columns:
     number:
       type: string(64)
@@ -71,20 +85,33 @@ Account:
       type: one
       foreignAlias: Accounts
       onDelete: CASCADE
-    Securities:
-      foreignAlias: Accounts
-      class: Security
-      refClass: AccountSecurity
     Transactions:
+      autoComplete: true
+      class: Transaction
       orderBy: trade_date ASC
-    HoldingHistories:
-      class: HoldingHistory
-      orderBy: date DESC
+      foreign: account_id
+      local: id
+      type: many
+      foreignType: one
+      orderBy: [security_id, trade_date DESC, id DESC]
+    LatestTransaction:
+      autoComplete: false
+      class: Transaction
+      orderBy: [ trade_date DESC, id DESC ]
+      foreign: account_id
+      local: id
+      type: one
+    Securities:
+      class: Security
+      foreignAlias: Accounts
+      refClass: Transaction
+      local: account_id
+      foreign: security_id
 Action:
+  actAs:
+    I18n:
+      fields: [ name ]
   connection: doctrine
-  options:
-    collate: utf8_unicode_ci
-    charset: utf8
   tableName: action
   options:
     collate: utf8_unicode_ci
@@ -112,15 +139,6 @@ Price:
     date:
       type: date
       notnull: true
-    cprice:
-      type: decimal(16)
-      scale: 4
-    pchange:
-      type: decimal(16)
-      scale: 4
-    ppchange:
-      type: decimal(16)
-      scale: 4
     open:
       type: decimal(16)
       scale: 4
@@ -136,12 +154,14 @@ Price:
     volume:
       type: integer
   actAs:
-    Timestampable:
+    Timestampable: ~
   relations:
     Security:
       local: security_id
-      foreign: id
       type: one
+      foreign: id
+      foreignAlias: Prices
+      foreignType: many
   indexes:
     sdate:
       fields: [security_id, date]
@@ -184,61 +204,28 @@ Security:
       fields: ['symbol','market']
       type: unique
   relations:
-    Price:
-      local: id
-      foreign: security_id
-      type: many
-    Transaction:
-      local: id
-      foreign: security_id
-      type: many
-AccountSecurity:
-  options:
-    symfony:
-      form:   false
-      filter: false
-  columns:
-    account_id:
-      type: integer
-      primary: true
-    security_id:
-      type: integer
-      primary: true
-    quantity:
-      type: integer
-      default: 0
-    buy_quantity:
-      type: integer
-      default: 0
-    sell_quantity:
-      type: integer
-      default: 0
-    buy_amount:
-      type: decimal(16)
-      scale: 4
-    sell_amount:
-      type: decimal(16)
-      scale: 4
-    amount:
-      type: decimal(16)
-      scale: 4
-    dividend:
-      type: decimal(16)
-      scale: 4
-  relations:
-    Account:
-      local: account_id
-      foreign: id
-      foreignAlias: AccountSecurities
-    Security:
+    Accounts:
+      class: Accounts 
+      foreignAlias: Securities
+      refClass: Transaction
+      foreign: account_id
       local: security_id
-      foreign: id
-      foreignAlias: AccountSecurities 
-  indexes:
-    as_idx:
-      fields: [account_id,security_id]
-      type: unique
+    LatestPrice:
+      autoComplete: false
+      class: Price
+      orderBy: [ date DESC, id DESC ]
+      foreign: security_id
+      local: id
+      type: one
 Synthetic:
+  actAs:
+    I18n:
+      fields: [ name, description ]
+    Sluggable:
+      unique: true
+      fields: [ name ]
+      canUpdate: true
+    Timestampable: ~
   connection: doctrine
   tableName: synthetic
   options:
@@ -260,11 +247,6 @@ Synthetic:
       primary: false
       notnull: false
       autoincrement: false
-  relations:
-    Transaction:
-      local: id
-      foreign: synthetic_id
-      type: many
 Transaction:
   actAs:
     MovingTotal:
@@ -272,6 +254,7 @@ Transaction:
         column: amount
         totalColumn: balance
         orderBy: trade_date
+        groupBy: [account_id]
       quantity:
         column: quantity
         totalColumn: total_quantity
@@ -317,6 +300,14 @@ Transaction:
         condition:
           column: action_id
           values: [2]
+      deposit:
+        column: amount
+        totalColumn: deposit
+        orderBy: trade_date
+        groupBy: [account_id,security_id]
+        condition:
+          column: action_id
+          values: [9,29,109]
   connection: doctrine
   tableName: transaction
   options:
@@ -364,9 +355,6 @@ Transaction:
     synthetic_id:
       type: integer
       notnull: false
-    holding_history_id:
-      type: integer(4)
-      default: null
     balance:
       type: decimal(16)
       scale: 4
@@ -404,15 +392,7 @@ Transaction:
       scale: 4
       default: '0.00'
       notnull: true
-    prev_tran:
-      type: integer
-      default: null
-      notnull: false
   relations:
-    Transaction:
-      local: prev_tran
-      foreign: id
-      type: one
     Account:
       local: account_id
       foreign: id
@@ -423,66 +403,20 @@ Transaction:
       local: action_id
       foreign: id
       type: one
+      foreignType: many
+      foreignAlias: Transactions
     Security:
       local: security_id
       foreign: id
       type: one
+      foreignType: many
+      foreignAlias: Transactions
     Synthetic:
       local: synthetic_id
       foreign: id
       type: one
-    HoldingHistory:
-      local: holding_history_id
-      type: one
-      foreign: id
-Alert:
-  actAs: [Timestampable]
-  columns:
-    max: 
-      type: decimal(16)
-      scale: 4
-    min: 
-      type: decimal(16)
-      scale: 4
-PriceAlert:
-  actAs: [Timestampable]
-  options:
-    collate: utf8_unicode_ci
-    charset: utf8
-  columns:
-    user_id:
-      type: integer
-      primary: true
-    alert_id:
-      type: integer
-      primary: true
-    security_id:
-      type: integer
-    description:
-      type: text
-  relations:
-    Alert:
-      class: Alert
-      local: alert_id
-      type: one
-      onDelete: CASCADE
-    Security:
-      class: Security
-      local: security_id
-      type: one
-      onDelete: CASCADE
-    User:
-      class: sfGuardUser
-      foreign: id
-      local: user_id
-      type: one  
-      onDelete: cascade    
       foreignType: many
-      foreignAlias: PriceAlerts
-  indexes:
-    SU:
-      fields: [security_id, user_id]
-      type: unique
+      foreignAlias: Transactions
 Performance:
   columns:
      account_id:
@@ -523,32 +457,4 @@ Performance:
   indexes:
     idx:
       fields: ['account_id','date']
-      type: unique
-HoldingHistory:
-  columns:
-    account_id: integer
-    security_id: integer
-    date: 
-      type: date
-      notnull: true
-    quantity: integer
-    buy_price:
-      type: decimal(16)
-      scale: 4
-    price:
-      type: decimal(16)
-      scale: 4
-    market_value: 
-      type: decimal(16)
-      scale: 4
-      default: '0.00'
-      notnull: true
-    dividend:
-      type: decimal(16)
-      scale: 4
-      default: '0.00'
-      notnull: true
-  indexes:
-    idx:
-      fields: ['account_id','security_id','date']
       type: unique
